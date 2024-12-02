@@ -5,12 +5,12 @@ import authMiddleware from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
-//게임 생성
+//게임 생성  //parameter에 userPID 입력
 router.post('/game-start/:userPID', async (req, res, next) => {
   const mySquad = req.params;
   const enemySquad = req.body;
 
-  //입력한 유저PID를 가지고 있는 스쿼드정보
+  //parameter에 입력한 유저PID를 가지고 있는 스쿼드정보
   const mySquadInfo = await prisma.player_squads_data.findFirst({
     where: {
       userPID: +mySquad,
