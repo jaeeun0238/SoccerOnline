@@ -9,7 +9,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -30,7 +30,7 @@ model user_Data{
 model player_rosters_Data{
   player_rostersPID Int @id @default(autoincrement()) @map("player_rostersPID")
   userPID Int @unique @map("userPID")
-  have_Rosters Json @default{} @map("have_Rosters")
+  have_Rosters Json @default("[{}]") @map("have_Rosters")
   maxHave_Rosters Int @default(20) @map("maxHave_Rosters")
 
   user_data user_Data @relation(fields: [userPID], references: [userPID], onDelete: Cascade,onUpdate: Cascade)
@@ -40,9 +40,9 @@ model player_rosters_Data{
 model player_squads_Data{
   player_squadsPID Int @id @default(autoincrement()) @map("player_squadsPID")
   userPID Int @unique @map("userPID")
-  strikerPosition Json @default({}) @map("strikerPosition")
-  midfielderPosition Json @default({}) @map("midfielderPosition")
-  defenderPosition Json @default({}) @map("defenderPosition")
+  strikerPosition Json @default("[{}]") @map("strikerPosition")
+  midfielderPosition Json @default("[{}]") @map("midfielderPosition")
+  defenderPosition Json @default("[{}]") @map("defenderPosition")
   maxHave_Squads Int @default(1) @map("maxHave_Squads")
 
   user_data user_Data @relation(fields: [userPID], references: [userPID], onDelete: Cascade,onUpdate: Cascade)
