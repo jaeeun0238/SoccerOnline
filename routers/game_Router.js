@@ -1,7 +1,6 @@
 /* 기본 게임 기능 */
 import express from 'express';
-import { prisma } from '../utils/prisma/index.js';
-import authMiddleware from '../middlewares/auth.middleware.js';
+import { prisma } from '../uts/prisma/index.js';
 
 const router = express.Router();
 
@@ -11,14 +10,14 @@ router.post('/game-start/:userPID', async (req, res, next) => {
   const enemySquad = req.body;
 
   //parameter에 입력한 유저PID를 가지고 있는 스쿼드정보
-  const mySquadInfo = await prisma.player_squads_data.findFirst({
+  const mySquadInfo = await prisma.player_squads_Data.findFirst({
     where: {
       userPID: +mySquad,
     },
   });
 
   //body에서 입력한 스쿼드PID를 가진 스쿼드정보
-  const enemySquadInfo = await prisma.player_squads_data.findFirst({
+  const enemySquadInfo = await prisma.player_squads_Data.findFirst({
     where: {
       player_squadsPID: +enemySquad,
     },
