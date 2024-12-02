@@ -41,8 +41,8 @@ model player_squads_Data{
   player_squadsPID Int @id @default(autoincrement()) @map("player_squadsPID")
   userPID Int @unique @map("userPID")
   strikerPosition Json @default({}) @map("strikerPosition")
-  midfielderPosition Json @default({}) @map("strikerPosition")
-  defenderPosition Json @default({}) @map("strikerPosition")
+  midfielderPosition Json @default({}) @map("midfielderPosition")
+  defenderPosition Json @default({}) @map("defenderPosition")
   maxHave_Squads Int @default(1) @map("maxHave_Squads")
 
   user_data user_Data @relation(fields: [userPID], references: [userPID], onDelete: Cascade,onUpdate: Cascade)
