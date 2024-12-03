@@ -11,21 +11,21 @@ router.post('/game-start/:userPID', async (req, res, next) => {
     const enemySquad = req.body;
 
     //parameter에 입력한 유저PID를 가지고 있는 스쿼드정보
-    const mySquadInfo = await prisma.player_squads_Data.findFirst({
+    const mySquadInfo = await prisma.playerSquadsData.findFirst({
       where: {
         userPID: +mySquad,
       },
     });
 
     //body에서 입력한 스쿼드PID를 가진 스쿼드정보
-    const enemySquadInfo = await prisma.player_squads_Data.findFirst({
+    const enemySquadInfo = await prisma.playersquadsData.findFirst({
       where: {
         player_squadsPID: +enemySquad,
       },
     });
 
     //수정필요
-    const mySquadScore = mySquadInfo.strikerPosition.playerAbility_ATCK;
+    const mySquadScore = mySquadInfo.strikerPositionPlayerPID.playerAbilityATCK;
     const enemySquadScore = enemySquadInfo.strikerPosition.playerAbility_ATCK;
 
     const maxScore = mySquadScore + enemySquadScore;
