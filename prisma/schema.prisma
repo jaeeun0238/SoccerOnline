@@ -17,7 +17,9 @@ model userData {
 
   playerRostersData playerRostersData[]
   playerSquadsData  playerSquadsData[]
+
   playerEquipRostersData playerEquipRostersData[]
+
 
   @@map("userData")
 }
@@ -32,6 +34,7 @@ model playerRostersData {
   
   @@map("playerRostersData")
 }
+
 
 model playerEquipRostersData {
   playerRostersPID Int  @id @default(autoincrement()) @map("playerRostersPID")
@@ -56,6 +59,18 @@ model playerSquadsData {
 
   @@index([userPID], map: "playerSquadsData_userPID_fkey")
   @@map("playerSquadsData")
+}
+
+model playerData {
+  playerPID             Int    @id @default(autoincrement()) @map("playerPID")
+  playerName            String @unique @map("playerName")
+  playerAbilityATCK     Int    @map("playerAbilityATCK")
+  playerAbilityDEFEND   Int    @map("playerAbilityDEFEND")
+  playerAbilityMOBILITY Int    @map("playerAbilityMOBILITY")
+  playerEnchant         Int    @default(0) @map("playerEnchant")
+  playerPrice           Int    @default(0) @map("playerPrice")
+
+  @@map("playerData")
 }
 
 model playerData {
