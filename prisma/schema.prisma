@@ -38,6 +38,18 @@ model playerRostersData {
   @@map("playerRostersData")
 }
 
+model playerEquipRostersData {
+  playerRostersPID Int  @id @default(autoincrement()) @map("playerRostersPID")
+  userPID               Int    @map("userPID")
+  playerPID             Int    @map("playerPID")
+  playerEnchant         Int    @default(0) @map("playerEnchant")
+
+  userData userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
+  
+  @@map("playerEquipRostersData")
+}
+
+
 model playerSquadsData {
   playerSquadsPID    Int  @id @default(autoincrement()) @map("playerSquadsPID")
   userPID            Int  @map("userPID")
