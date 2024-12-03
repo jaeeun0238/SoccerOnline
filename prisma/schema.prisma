@@ -13,50 +13,51 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model user_Data{
-  userPID Int @id @default(autoincrement()) @map("userPID")
-  userID String @unique @map("userID")
-  userName String @unique @map("userName")
+model userData {
+  userPID      Int    @id @default(autoincrement()) @map("userPID")
+  userID       String @unique @map("userID")
+  userName     String @unique @map("userName")
   userPassword String @map("userPassword")
-  userScore Int @map("userScore")
-  userCash Int @map("userCash")
+  userScore    Int    @map("userScore")
+  userCash     Int    @map("userCash")
 
-  player_rosters_Data player_rosters_Data?
-  player_squads_Data player_squads_Data?
+  playerRostersData playerRostersData[]
+  playerSquadsData  playerSquadsData[]
 
-  @@map("user_Data")
+  @@map("userData")
 }
 
-model player_rosters_Data{
-  player_rostersPID Int @id @default(autoincrement()) @map("player_rostersPID")
-  userPID Int @unique @map("userPID")
-  have_Rosters Json @default("[]") @map("have_Rosters")
-  maxHave_Rosters Int @default(20) @map("maxHave_Rosters")
+model playerRostersData {
+  playerRostersPID Int  @id @default(autoincrement()) @map("playerRostersPID")
+  userPID               Int    @map("userPID")
+  playerPID             Int    @map("playerPID")
+  playerEnchant         Int    @default(0) @map("playerEnchant")
 
-  user_data user_Data @relation(fields: [userPID], references: [userPID], onDelete: Cascade,onUpdate: Cascade)
-  @@map("player_rosters_Data")
+  userData userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
+  
+  @@map("playerRostersData")
 }
 
-model player_squads_Data{
-  player_squadsPID Int @id @default(autoincrement()) @map("player_squadsPID")
-  userPID Int @unique @map("userPID")
-  strikerPosition Json @default("[]") @map("strikerPosition")
-  midfielderPosition Json @default("[]") @map("midfielderPosition")
-  defenderPosition Json @default("[]") @map("defenderPosition")
-  maxHave_Squads Int @default(1) @map("maxHave_Squads")
+model playerSquadsData {
+  playerSquadsPID    Int  @id @default(autoincrement()) @map("playerSquadsPID")
+  userPID            Int  @map("userPID")
+  strikerPositionPlayerPID    Int @default(0) @map("strikerPositionPlayerPID")
+  midfielderPositionPlayerPID Int @default(0) @map("midfielderPositionPlayerPID")
+  defenderPositionPlayerPID   Int @default(0) @map("defenderPositionPlayerPID")
 
-  user_data user_Data @relation(fields: [userPID], references: [userPID], onDelete: Cascade,onUpdate: Cascade)
-  @@map("player_squads_Data")
+  userData userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("playerSquadsData")
 }
 
-model player_Data{
-  playerPID Int @id @default(autoincrement()) @map("playerPID")
-  playerName String @unique @map("playerName")
-  playerAbility_ATCK Int @map("playerAbility_ATCK")
-  playerAbility_DEFEND Int @map("playerAbility_DEFEND")
-  playerAbility_Mobility Int @map("playerAbility_Mobility")
-  player_Enchant Int @default(0) @map("player_Enchant")
-  player_Price Int @default(0) @map("Price")
+model playerData {
+  playerPID             Int    @id @default(autoincrement()) @map("playerPID")
+  playerName            String @unique @map("playerName")
+  playerAbilityATCK     Int    @map("playerAbilityATCK")
+  playerAbilityDEFEND   Int    @map("playerAbilityDEFEND")
+  playerAbilityMOBILITY Int    @map("playerAbilityMOBILITY")
+  playerEnchant         Int    @default(0) @map("playerEnchant")
+  playerPrice           Int    @default(0) @map("playerPrice")
 
-  @@map("player_Data")
+  @@map("playerData")
 }
