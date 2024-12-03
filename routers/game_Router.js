@@ -24,7 +24,7 @@ router.post('/game-start/:userPID', async (req, res, next) => {
   });
 
   //수정필요
-  const mySquadScore = mySquadInfo.strikerPosition.shoot;
+  const mySquadScore = mySquadInfo.strikerPosition.playerAbility_ATCK;
   const enemySquadScore = enemySquadInfo.strikerPosition.shoot;
 
   const maxScore = mySquadScore + enemySquadScore;
