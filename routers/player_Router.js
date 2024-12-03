@@ -1,5 +1,8 @@
 import express from 'express';
+<<<<<<< HEAD
 import { PrismaClient } from '@prisma/client';
+=======
+>>>>>>> e015615ed0466bbb9fef8ba48c54e02dd45ff7f1
 import { prisma } from '../uts/prisma/index.js';
 
 const router = express.Router();
@@ -32,7 +35,7 @@ router.post('/player/make', async (req, res, next) => {
         `,
     });
   } catch (err) {
-    next(err);
+    next(err);  
   }
 });
 
@@ -43,6 +46,9 @@ const GACHA_COST = 100; // 1회 가챠 비용 (예시로 100 설정)
 // 가챠 함수
 const performGacha = async (userID) => {
   try {
+    //트랜잭션 추가
+    const result = await prisma.$transaction(async (prisma) => {
+
     // 유저 정보 조회
     const user = await prisma.user_Data.findUnique({
       where: { userID },
@@ -90,15 +96,19 @@ const performGacha = async (userID) => {
         ], // 선수 추가
       },
     });
+      return {
+        updatedUser,
+        randomPlayer,
+      };
+    });
 
     return {
-      message: 'Gacha successful!',
-      player: randomPlayer,
-      asciiEffect: `
+      message: `
       🌟✨🌟✨🌟✨🌟
-      Congratulations!
+      Congratulations! You got ${result.randomPlayer.playerName}!
       🌟✨🌟✨🌟✨🌟
       `,
+      player: randomPlayer,
     };
   } catch (error) {
     return {
@@ -108,7 +118,11 @@ const performGacha = async (userID) => {
 };
 
 // 선수 뽑기 API
+<<<<<<< HEAD
 router.post('/player/gacha', async (req, res) => {
+=======
+router.post('/api/player/gacha', async (req, res) => {
+>>>>>>> e015615ed0466bbb9fef8ba48c54e02dd45ff7f1
   const { userID } = req.body;
 
   const result = await performGacha(userID);
