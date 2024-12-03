@@ -2,7 +2,7 @@
   "material-icon-theme.activeIconPack": "nest",
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  //"editor.fontFamily": "'IBM Plex Mono', Menlo, Monaco, 'Courier New', monospace",
+  "editor.fontFamily": "'IBM Plex Mono', Menlo, Monaco, 'Courier New', monospace",
   "editor.fontSize": 14,
   "editor.mouseWheelZoom": true,
   "editor.minimap.enabled": false,
