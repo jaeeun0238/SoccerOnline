@@ -105,7 +105,7 @@ const performGacha = async (userID) => {
 };
 
 // 선수 뽑기 API
-router.post('/api/player/gacha', async (req, res) => {
+router.post('/player/gacha', async (req, res) => {
   const { userID } = req.body;
 
   const result = await performGacha(userID);

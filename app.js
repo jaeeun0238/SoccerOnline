@@ -3,7 +3,7 @@ import errorMiddleware from './middlewares/error.middleware.js';
 import playersRouter from './routers/player_Router.js';
 
 const app = express(); // exoress()함수를 호출해서 app라는 객체생성
-const PORT = 3017; // 서버기 실행될 포트, 3017번 사용
+const PORT = 3017; // 서버가 실행될 포트, 3017번 사용
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); //바디 파서
