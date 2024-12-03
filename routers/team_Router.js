@@ -33,6 +33,72 @@ router.patch(
       .json({ message: '팀에 성공적으로 배치했습니다!', data: data_temp });
   },
 );
+//팀 선택창에서 해제
+router.patch(
+  '/api/team/Get/:positionIndex/what/:rostersIndex',
+  async (res, req, next) => {
+    const { positionIndex } = req.params.positionIndex;
+    const { rostersIndex } = req.params.rostersIndex;
+    const { userPID } = req.user;
+    let data_temp = {};
+    switch (positionIndex) {
+      case 'ST':
+        data_temp = striker(userPID, rostersIndex, false, next);
+        break;
+      case 'MF':
+        data_temp = midfielder(userPID, rostersIndex, false, next);
+        break;
+      case 'DF':
+        data_temp = defender(userPID, rostersIndex, false, next);
+        break;
+      default:
+        return next(
+          errModel(400, '잘못된 형식의 포지션 입니다. 약자로 입력해주세요.'),
+        );
+    }
+    return res
+      .status(201)
+      .json({ message: '팀에서 성공적으로 해제했습니다!', data: data_temp });
+  },
+);
+router.get('/api/team/Get/:userPID', async (res, req, next) => {
+  const { userPID } = req.params;
+  const checkRosters = await prisma.player_rosters_Data.findFirst({
+    whele: {
+      userPID: userPID,
+    },
+    select: {
+      maxHave_Rosters: true,
+      have_Rosters: true,
+    },
+  });
+  if (!checkRosters) {
+    return next(
+      errModel(404, '잘못된 형식의 포지션 입니다. 약자로 입력해주세요.'),
+    );
+  }
+  //기본 적인 스쿼드 데이터
+  const checkSquads = await prisma.player_squads_Data.findFirst({
+    whele: {
+      userPID: userPID,
+    },
+    select: {
+      strikerPosition: true,
+      midfielderPosition: true,
+      defenderPosition: true,
+      maxHave_Squads: true,
+    },
+  });
+  if (!checkSquads) {
+    return next(
+      errModel(404, '잘못된 형식의 포지션 입니다. 약자로 입력해주세요.'),
+    );
+  }
+  return res.status(201).json({
+    message: ' 팀 스쿼드 배치와 보유 선수 현황입니다.',
+    data: { checkSquads, checkRosters },
+  });
+});
 //스트라이커 용도 함수
 const striker = async (userPID, rostersIndex, isSet, next) => {
   //보유 하고있는 로스터 데이터
