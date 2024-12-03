@@ -32,13 +32,13 @@ router.post('/player/make', async (req, res, next) => {
         `,
     });
   } catch (err) {
-    next(err);  
+    next(err);
   }
 });
 
 // 플레이어 뽑기 api
 
-const GachaCosT = 100;  // 1회 가챠 비용 (예시로 100 설정)
+const gachaCosT = 100;  // 1회 가챠 비용 (예시로 100 설정)
 
 // 가챠 함수
 const performGacha = async (userID) => {
@@ -56,7 +56,7 @@ const performGacha = async (userID) => {
       }
 
       // 유저 캐시 확인
-      if (user.userCash < GachaCosT) {
+      if (user.userCash < gachaCosT) {
         throw new Error('Not enough cash for gacha');
       }
 
@@ -64,7 +64,7 @@ const performGacha = async (userID) => {
       const updatedUser = await prisma.userData.update({
         where: { userID },
         data: {
-          userCash: user.userCash - GachaCosT,  // 가챠 비용 차감
+          userCash: user.userCash - gachaCosT,  // 가챠 비용 차감
         },
       });
 
@@ -105,7 +105,7 @@ const performGacha = async (userID) => {
 };
 
 // 선수 뽑기 API
-router.post('/player/gacha', async (req, res) => {
+router.post('/api/player/gacha', async (req, res) => {
   const { userID } = req.body;
 
   const result = await performGacha(userID);
