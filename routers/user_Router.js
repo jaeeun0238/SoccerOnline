@@ -24,7 +24,7 @@ router.patch('/buyCash', async (req, res, next) => {
     const userPID = decodedToken.userPID; //토큰의 userPID부분 가져옴
 
     // 현재 보유량 + 추가 캐시 하기위해 현재 user정보 가져옴
-    const user = await prisma.user_Data.findUnique({
+    const user = await prisma.userData.findUnique({
       where: { userPID },
     });
 
@@ -44,7 +44,7 @@ router.patch('/buyCash', async (req, res, next) => {
     }
 
     // 캐시 추가해서 업데이트
-    const updateCash = await prisma.user_Data.update({
+    const updateCash = await prisma.userData.update({
       where: { userPID },
       data: { userCash: user.userCash + cash },
     });
@@ -54,3 +54,5 @@ router.patch('/buyCash', async (req, res, next) => {
     next(err);
   }
 });
+
+export default router;
