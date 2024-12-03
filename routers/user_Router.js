@@ -24,7 +24,7 @@ router.patch('/buyCash', async (req, res, next) => {
     const userPID = decodedToken.userPID; //토큰의 userPID부분 가져옴
 
     // 현재 보유량 + 추가 캐시 하기위해 현재 user정보 가져옴
-    const user = await prisma.user_Data.findFirst({
+    const user = await prisma.user_Data.findUnique({
       where: { userPID },
     });
 
