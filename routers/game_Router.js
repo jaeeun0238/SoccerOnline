@@ -23,6 +23,9 @@ router.post('/game-start/:userPID', async (req, res, next) => {
         playerSquadsPID: +enemySquad,
       },
     });
+    if (!enemySquadInfo) {
+      return res.status(404).json({ error: '스쿼드를 찾을수 없습니다' });
+    }
 
     //수정필요
     const mySquadScore = mySquadInfo.strikerPositionPlayerPID.playerAbilityATCK;
