@@ -23,6 +23,7 @@ model userData {
 
   playerRostersData playerRostersData[]
   playerSquadsData  playerSquadsData[]
+  playerEquipRostersData playerEquipRostersData[]
 
   @@map("userData")
 }
