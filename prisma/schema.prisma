@@ -23,10 +23,7 @@ model userData {
 
   playerRostersData playerRostersData[]
   playerSquadsData  playerSquadsData[]
-<<<<<<< HEAD
-=======
   playerEquipRostersData playerEquipRostersData[]
->>>>>>> main
 
   @@map("userData")
 }
@@ -42,29 +39,6 @@ model playerRostersData {
   @@map("playerRostersData")
 }
 
-<<<<<<< HEAD
-model playerSquadsData {
-  playerSquadsPID    Int  @id @default(autoincrement()) @map("playerSquadsPID")
-  userPID            Int  @map("userPID")
-  strikerPlayerRostersPID   Int @default(0) @map("strikerPlayerRostersPID")
-  midfielderPlayerRostersPID Int @default(0) @map("midfielderPlayerRostersPID")
-  defenderPlayerRostersPID   Int @default(0) @map("defenderPlayerRostersPID")
-
-  userData userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
-
-  @@map("playerSquadsData")
-}
-
-model playerData {
-  playerPID             Int    @id @default(autoincrement()) @map("playerPID")
-  playerName            String @unique @map("playerName")
-  playerAbilityATCK     Int    @map("playerAbilityATCK")
-  playerAbilityDEFEND   Int    @map("playerAbilityDEFEND")
-  playerAbilityMOBILITY Int    @map("playerAbilityMOBILITY")
-  playerEnchant         Int    @default(0) @map("playerEnchant")
-  playerPrice           Int    @default(0) @map("playerPrice")
-
-=======
 model playerEquipRostersData {
   playerRostersPID Int  @id @default(autoincrement()) @map("playerRostersPID")
   userPID               Int    @map("userPID")
@@ -98,6 +72,5 @@ model playerData {
   playerEnchant         Int    @default(0) @map("playerEnchant")
   playerPrice           Int    @default(0) @map("playerPrice")
 
->>>>>>> main
   @@map("playerData")
 }
