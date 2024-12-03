@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -24,6 +18,9 @@ model userData {
   playerRostersData playerRostersData[]
   playerSquadsData  playerSquadsData[]
 
+  playerEquipRostersData playerEquipRostersData[]
+
+
   @@map("userData")
 }
 
@@ -38,16 +35,42 @@ model playerRostersData {
   @@map("playerRostersData")
 }
 
+
+model playerEquipRostersData {
+  playerRostersPID Int  @id @default(autoincrement()) @map("playerRostersPID")
+  userPID               Int    @map("userPID")
+  playerPID             Int    @map("playerPID")
+  playerEnchant         Int    @default(0) @map("playerEnchant")
+
+  userData userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
+  
+  @@map("playerEquipRostersData")
+}
+
+
 model playerSquadsData {
   playerSquadsPID    Int  @id @default(autoincrement()) @map("playerSquadsPID")
   userPID            Int  @map("userPID")
-  strikerPositionPlayerPID    Int @default(0) @map("strikerPositionPlayerPID")
-  midfielderPositionPlayerPID Int @default(0) @map("midfielderPositionPlayerPID")
-  defenderPositionPlayerPID   Int @default(0) @map("defenderPositionPlayerPID")
+  strikerPlayerRostersPID   Int @default(0) @map("strikerPlayerRostersPID")
+  midfielderPlayerRostersPID Int @default(0) @map("midfielderPlayerRostersPID")
+  defenderPlayerRostersPID   Int @default(0) @map("defenderPlayerRostersPID")
 
   userData userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
 
+  @@index([userPID], map: "playerSquadsData_userPID_fkey")
   @@map("playerSquadsData")
+}
+
+model playerData {
+  playerPID             Int    @id @default(autoincrement()) @map("playerPID")
+  playerName            String @unique @map("playerName")
+  playerAbilityATCK     Int    @map("playerAbilityATCK")
+  playerAbilityDEFEND   Int    @map("playerAbilityDEFEND")
+  playerAbilityMOBILITY Int    @map("playerAbilityMOBILITY")
+  playerEnchant         Int    @default(0) @map("playerEnchant")
+  playerPrice           Int    @default(0) @map("playerPrice")
+
+  @@map("playerData")
 }
 
 model playerData {
