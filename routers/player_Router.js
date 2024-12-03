@@ -1,5 +1,5 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client';
 import { prisma } from '../uts/prisma/index.js';
 
 const router = express.Router();
@@ -9,16 +9,16 @@ router.post('/player/make', async (req, res, next) => {
     //body로 전달 받은 객체 구조분해할당
     const {
       playerName,
-      playerAbility_ATCK,
-      playerAbility_DEFEND,
-      playerAbility_Mobility,
+      playerAbilityATCK,
+      playerAbilityDEFEND,
+      playerAbilityMOBILITY,
     } = req.body;
-    const player = await prisma.player_Data.create({
+    const player = await prisma.playerData.create({
       data: {
         playerName,
-        playerAbility_ATCK,
-        playerAbility_DEFEND,
-        playerAbility_Mobility,
+        playerAbilityATCK,
+        playerAbilityDEFEND,
+        playerAbilityMOBILITY,
       },
     });
 
@@ -26,9 +26,9 @@ router.post('/player/make', async (req, res, next) => {
     return res.status(201).json({
       message: `성공적으로 선수를 생성하였습니다. 
         선수 이름 : ${playerName}
-        공격력 : ${playerAbility_ATCK}
-        수비력 : ${playerAbility_DEFEND}
-        속력 : ${playerAbility_Mobility}
+        공격력 : ${playerAbilityATCK}
+        수비력 : ${playerAbilityDEFEND}
+        속력 : ${playerAbilityMOBILITY}
         `,
     });
   } catch (err) {
@@ -38,7 +38,7 @@ router.post('/player/make', async (req, res, next) => {
 
 // 플레이어 뽑기 api
 
-const GACHA_COST = 100;  // 1회 가챠 비용 (예시로 100 설정)
+const GACHA_COST = 100; // 1회 가챠 비용 (예시로 100 설정)
 
 // 가챠 함수
 const performGacha = async (userID) => {
@@ -61,7 +61,7 @@ const performGacha = async (userID) => {
     const updatedUser = await prisma.user_Data.update({
       where: { userID },
       data: {
-        userCash: user.userCash - GACHA_COST,  // 가챠 비용 차감
+        userCash: user.userCash - GACHA_COST, // 가챠 비용 차감
       },
     });
 
@@ -74,12 +74,20 @@ const performGacha = async (userID) => {
       where: { userPID: user.userPID },
       update: {
         have_Rosters: {
-          push: { playerPID: randomPlayer.playerPID, playerName: randomPlayer.playerName },  // 선수 추가
+          push: {
+            playerPID: randomPlayer.playerPID,
+            playerName: randomPlayer.playerName,
+          }, // 선수 추가
         },
       },
       create: {
         userPID: user.userPID,
-        have_Rosters: [{ playerPID: randomPlayer.playerPID, playerName: randomPlayer.playerName }],  // 선수 추가
+        have_Rosters: [
+          {
+            playerPID: randomPlayer.playerPID,
+            playerName: randomPlayer.playerName,
+          },
+        ], // 선수 추가
       },
     });
 
@@ -100,7 +108,7 @@ const performGacha = async (userID) => {
 };
 
 // 선수 뽑기 API
-app.post('/api/player/gacha', async (req, res) => {
+router.post('/player/gacha', async (req, res) => {
   const { userID } = req.body;
 
   const result = await performGacha(userID);
