@@ -1,88 +1,134 @@
 import express from 'express';
 import { prisma } from '../uts/prisma/index.js';
 import { Prisma } from '@prisma/client';
-import removeAtIndex from '../uts/models/removeIndex.js';
 
 const router = express.Router();
 
 const maxHave_Rosters = 20; //보유할수 있는 최대값
 const maxHave_Squads = 1; //장착 할수 있는 최대값
-//인벤토리 선택한 인덱스 받아와서 어떤 포지션에 넣을지 정하기
+
 router.patch(
-  '/api/team/Set/:positionIndex/what/:playerRostersPID',
+  '/team/Set/:positionIndex/what/:playerRostersPID',
   async (res, req, next) => {
     const { positionIndex } = req.params.positionIndex;
     const { playerRostersPID } = req.params.playerRostersPID;
     const { userPID } = req.user;
     let data_temp = {};
-    switch (positionIndex) {
-      case 'ST':
-        data_temp = striker(userPID, playerRostersPID, true, next);
-        break;
-      case 'MF':
-        data_temp = midfielder(userPID, playerRostersPID, true, next);
-        break;
-      case 'DF':
-        data_temp = defender(userPID, playerRostersPID, true, next);
-        break;
-      default:
-        return next(
-          errModel(400, '잘못된 형식의 포지션 입니다. 약자로 입력해주세요.'),
-        );
+    try {
+      switch (positionIndex) {
+        case 'ST':
+          data_temp = striker(userPID, playerRostersPID, true, next);
+          break;
+        case 'MF':
+          data_temp = midfielder(userPID, playerRostersPID, true, next);
+          break;
+        case 'DF':
+          data_temp = defender(userPID, playerRostersPID, true, next);
+          break;
+        default:
+          throw {
+            statusCode: 400,
+            message: '잘못된 형식의 포지션 입니다. 약자로 입력해주세요.',
+          };
+      }
+      return res
+        .status(201)
+        .json({ message: '팀에 성공적으로 배치했습니다!', data: data_temp });
+    } catch (err) {
+      next(err);
     }
-    return res
-      .status(201)
-      .json({ message: '팀에 성공적으로 배치했습니다!', data: data_temp });
   },
 );
 //팀 선택창에서 해제
+router.patch(
+  '/team/Get/:positionIndex/what/:playerRostersPID',
+  async (res, req, next) => {
+    const { positionIndex } = req.params.positionIndex;
+    const { playerRostersPID } = req.params.playerRostersPID;
+    const { userPID } = req.user;
+    let data_temp = {};
+    try {
+      switch (positionIndex) {
+        case 'ST':
+          data_temp = striker(userPID, playerRostersPID, false, next);
+          break;
+        case 'MF':
+          data_temp = midfielder(userPID, playerRostersPID, false, next);
+          break;
+        case 'DF':
+          data_temp = defender(userPID, playerRostersPID, false, next);
+          break;
+        default:
+          throw {
+            statusCode: 400,
+            message: '잘못된 형식의 포지션 입니다. 약자로 입력해주세요.',
+          };
+      }
+      return res
+        .status(201)
+        .json({ message: '팀에 성공적으로 배치했습니다!', data: data_temp });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
 //팀 갱신
-router.get('/api/team/Get/:userPID', async (res, req, next) => {
+router.get('/team/Get/:userPID', async (res, req, next) => {
   const { userPID } = req.params;
-  const checkHaveRouter = await prisma.playerRostersData.findMany({
-    whele: {
-      userPID: userPID,
-    },
-  });
-  if (!checkHaveRouter) {
-    return next(
-      errModel(404, '잘못된 형식의 포지션 입니다. 약자로 입력해주세요.'),
-    );
+  try {
+    const checkHaveRouter = await prisma.playerRostersData.findMany({
+      whele: {
+        userPID: userPID,
+      },
+    });
+    if (!checkHaveRouter) {
+      throw {
+        statusCode: 404,
+        message: '보유 중인 선수가 없습니다.',
+      };
+    }
+    const checkEquipRouter = await prisma.playerEquipRostersData.findMany({
+      whele: {
+        userPID: userPID,
+      },
+    });
+    if (!checkHaveRouter) {
+      throw {
+        statusCode: 404,
+        message: '장착 중인 선수가 없습니다.',
+      };
+    }
+    //기본 적인 스쿼드 데이터
+    const checkSquads = await prisma.playerSquadsData.findFirst({
+      whele: {
+        userPID: userPID,
+      },
+      select: {
+        strikerPosition: true,
+        midfielderPosition: true,
+        defenderPosition: true,
+      },
+    });
+    if (!checkSquads) {
+      return next(errModel(404, '스쿼드 데이터가 없습니다.'));
+    }
+    return res.status(201).json({
+      message: ' 팀 스쿼드 배치 보유 선수 현황입니다.',
+      data: { checkSquads, checkEquipRouter, checkHaveRouter },
+    });
+  } catch (err) {
+    next(err);
   }
-  //기본 적인 스쿼드 데이터
-  const checkSquads = await prisma.playerSquadsData.findFirst({
-    whele: {
-      userPID: userPID,
-    },
-    select: {
-      strikerPosition: true,
-      midfielderPosition: true,
-      defenderPosition: true,
-    },
-  });
-  if (!checkSquads) {
-    return next(
-      errModel(404, '잘못된 형식의 포지션 입니다. 약자로 입력해주세요.'),
-    );
-  }
-  return res.status(201).json({
-    message: ' 팀 스쿼드 배치와 보유 선수 현황입니다.',
-    data: { checkSquads, checkHaveRouter },
-  });
 });
 //스트라이커 용도 함수
 const striker = async (userPID, playerRostersPID, isSet, next) => {
   try {
     //보유 하고있는 로스터 데이터
     const checkHaveRouter = isSet
-      ? await prisma.playerRostersData.findMany({
+      ? await prisma.playerRostersData.findFirst({
           whele: {
             userPID: userPID,
             playerRostersPID: playerRostersPID,
-          },
-          select: {
-            playerPID: true,
-            playerRostersPID: true,
           },
         })
       : await prisma.playerRostersData.findMany({
@@ -94,47 +140,50 @@ const striker = async (userPID, playerRostersPID, isSet, next) => {
             playerRostersPID: true,
           },
         });
-    const checkEquipRouter = await prisma.playerRostersData.findMany({
-      whele: {
+    //스쿼드 찾기 나중에 다중 스쿼드로 구성하면 many로 받기
+    const checkSquads = await prisma.playerSquadsData.findFirst({
+      where: {
         userPID: userPID,
-        playerRostersPID: playerRostersPID,
       },
       select: {
-        playerPID: true,
-        playerRostersPID: true,
+        strikerPlayerRostersPID: true,
       },
     });
     if (isSet) {
       //스쿼드에 집어넣음
-      if (
-        checkHaveRouter.length === 0 ||
-        checkSquads.strikerPositionPlayerPID === playerRostersPID
-      ) {
+      if (!checkHaveRouter || checkSquads.strikerPlayerRostersPID != 0) {
         throw {
           statusCode: 404,
           message: '이미 장착중이거나 데이터가 없습니다.',
         };
       }
       //이제 db에 저장하는 트렌직션
-      const [striker_data] = await prisma.$transaction(
+      const striker_data = await prisma.$transaction(
         async (tx) => {
-          await tx.playerRostersData.update({
+          //장착 테이블에 생성
+          const striker_data = await tx.playerEquipRostersData.create({
+            data: {
+              userPID: checkHaveRouter.userPID,
+              playerPID: checkHaveRouter.playerPID,
+              playerEnchant: checkHaveRouter.playerEnchant,
+            },
+          });
+          //생성한값 playerSquadsData 저장
+          await tx.playerSquadsData.update({
             where: {
               userPID: userPID,
             },
             data: {
-              have_Rosters: rosters_temp,
+              strikerPlayerRostersPID: striker_data.playerRostersPID,
             },
           });
-          const striker_data = await tx.playerSquadsData.update({
+          //  playerRostersData 있던 값 삭제
+          await tx.playerRostersData.delete({
             where: {
-              userPID: userPID,
-            },
-            data: {
-              strikerPosition: Squads_temp,
+              playerRostersPID: playerRostersPID,
             },
           });
-          return [striker_data];
+          return striker_data;
         },
         {
           isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
@@ -142,39 +191,56 @@ const striker = async (userPID, playerRostersPID, isSet, next) => {
       );
       return striker_data;
     } else {
+      // 해제용도 로직.
+      //장착 체크용
+      const checkEquipRouter = await prisma.playerEquipRostersData.findFirst({
+        whele: {
+          userPID: userPID,
+          playerRostersPID: playerRostersPID,
+        },
+      });
       if (
-        checkSquads.strikerPosition[playerRostersPID] === undefined ||
-        checkHaveRouter.have_Rosters.length >= checkHaveRouter.maxHave_Rosters
+        //장착칸에 지정한 데이터가 없거나 공격수 칸에 지정한 번호랑 다른 사람이 있으면 오류
+        !checkEquipRouter ||
+        checkSquads.strikerPlayerRostersPID != playerRostersPID
       ) {
-        return next(errModel(404, '남은 공간이 모자르거나 데이터가 없습니다.'));
+        throw {
+          statusCode: 404,
+          message: '이미 장착중이거나 데이터가 없습니다.',
+        };
       }
-      //데이터 가공
-      const rosters_temp = [
-        ...checkHaveRouter.have_Rosters,
-        checkSquads.strikerPosition[playerRostersPID],
-      ];
-      const Squads_temp = removeAtIndex(
-        checkSquads.strikerPosition,
-        playerRostersPID,
-      );
+      if (checkHaveRouter.length > maxHave_Rosters) {
+        throw {
+          statusCode: 400,
+          message: '남은 공간이 없습니다.',
+        };
+      }
 
       //이제 db에 저장하는 트렌직션
       const [rosters_data] = await prisma.$transaction(
         async (tx) => {
-          const rosters_data = await tx.playerRostersData.update({
-            where: {
-              userPID: userPID,
-            },
+          // 보유 테이블에 생성 값은 지정한 장착한 테이블 값으로
+          const rosters_data = await tx.playerRostersData.create({
             data: {
-              have_Rosters: rosters_temp,
+              userPID: checkEquipRouter.userPID,
+              playerPID: checkEquipRouter.playerPID,
+              playerEnchant: checkEquipRouter.playerEnchant,
             },
           });
+          // 0값으로 초기화
           await tx.playerSquadsData.update({
             where: {
               userPID: userPID,
             },
             data: {
-              strikerPosition: Squads_temp,
+              strikerPlayerRostersPID: 0,
+            },
+          });
+          // 지정한 키의 값을 가진 장착 테이블 값 삭제
+          await prisma.playerEquipRostersData.delete({
+            whele: {
+              userPID: userPID,
+              playerRostersPID: playerRostersPID,
             },
           });
           return [rosters_data];
@@ -190,7 +256,273 @@ const striker = async (userPID, playerRostersPID, isSet, next) => {
   }
 };
 //미드필더 용도 함수
-const midfielder = async (userPID, rostersIndex, isSet, next) => {};
+const midfielder = async (userPID, playerRostersPID, isSet, next) => {
+  try {
+    //보유 하고있는 로스터 데이터
+    const checkHaveRouter = isSet
+      ? await prisma.playerRostersData.findFirst({
+          whele: {
+            userPID: userPID,
+            playerRostersPID: playerRostersPID,
+          },
+        })
+      : await prisma.playerRostersData.findMany({
+          whele: {
+            userPID: userPID,
+          },
+          select: {
+            playerPID: true,
+            playerRostersPID: true,
+          },
+        });
+    //스쿼드 찾기
+    const checkSquads = await prisma.playerSquadsData.findFirst({
+      where: {
+        userPID: userPID,
+      },
+      select: {
+        midfielderPlayerRostersPID: true,
+      },
+    });
+    if (isSet) {
+      //스쿼드에 집어넣음
+      if (!checkHaveRouter || checkSquads.midfielderPlayerRostersPID != 0) {
+        throw {
+          statusCode: 404,
+          message: '이미 장착중이거나 데이터가 없습니다.',
+        };
+      }
+      //이제 db에 저장하는 트렌직션
+      const striker_data = await prisma.$transaction(
+        async (tx) => {
+          //장착 테이블에 생성
+          const striker_data = await tx.playerEquipRostersData.create({
+            data: {
+              userPID: checkHaveRouter.userPID,
+              playerPID: checkHaveRouter.playerPID,
+              playerEnchant: checkHaveRouter.playerEnchant,
+            },
+          });
+          //생성한값 playerSquadsData 저장
+          await tx.playerSquadsData.update({
+            where: {
+              userPID: userPID,
+            },
+            data: {
+              midfielderPlayerRostersPID: striker_data.playerRostersPID,
+            },
+          });
+          //  playerRostersData 있던 값 삭제
+          await tx.playerRostersData.delete({
+            where: {
+              playerRostersPID: playerRostersPID,
+            },
+          });
+          return striker_data;
+        },
+        {
+          isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
+        },
+      );
+      return striker_data;
+    } else {
+      // 해제용도 로직.
+      //장착 체크용
+      const checkEquipRouter = await prisma.playerEquipRostersData.findFirst({
+        whele: {
+          userPID: userPID,
+          playerRostersPID: playerRostersPID,
+        },
+      });
+      if (
+        //장착칸에 지정한 데이터가 없거나 공격수 칸에 지정한 번호랑 다른 사람이 있으면 오류
+        !checkEquipRouter ||
+        checkSquads.midfielderPlayerRostersPID != playerRostersPID
+      ) {
+        throw {
+          statusCode: 404,
+          message: '이미 장착중이거나 데이터가 없습니다.',
+        };
+      }
+      if (checkHaveRouter.length > maxHave_Rosters) {
+        throw {
+          statusCode: 400,
+          message: '남은 공간이 없습니다.',
+        };
+      }
+
+      //이제 db에 저장하는 트렌직션
+      const [rosters_data] = await prisma.$transaction(
+        async (tx) => {
+          // 보유 테이블에 생성 값은 지정한 장착한 테이블 값으로
+          const rosters_data = await tx.playerRostersData.create({
+            data: {
+              userPID: checkEquipRouter.userPID,
+              playerPID: checkEquipRouter.playerPID,
+              playerEnchant: checkEquipRouter.playerEnchant,
+            },
+          });
+          // 0값으로 초기화
+          await tx.playerSquadsData.update({
+            where: {
+              userPID: userPID,
+            },
+            data: {
+              midfielderPlayerRostersPID: 0,
+            },
+          });
+          // 지정한 키의 값을 가진 장착 테이블 값 삭제
+          await prisma.playerEquipRostersData.delete({
+            whele: {
+              userPID: userPID,
+              playerRostersPID: playerRostersPID,
+            },
+          });
+          return [rosters_data];
+        },
+        {
+          isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
+        },
+      );
+      return rosters_data;
+    }
+  } catch (err) {
+    next(err);
+  }
+};
 //디펜더 용도 함수
-const defender = async (userPID, rostersIndex, isSet, next) => {};
+const defender = async (userPID, playerRostersPID, isSet, next) => {
+  try {
+    //보유 하고있는 로스터 데이터
+    const checkHaveRouter = isSet
+      ? await prisma.playerRostersData.findFirst({
+          whele: {
+            userPID: userPID,
+            playerRostersPID: playerRostersPID,
+          },
+        })
+      : await prisma.playerRostersData.findMany({
+          whele: {
+            userPID: userPID,
+          },
+          select: {
+            playerPID: true,
+            playerRostersPID: true,
+          },
+        });
+    //스쿼드 찾기
+    const checkSquads = await prisma.playerSquadsData.findFirst({
+      where: {
+        userPID: userPID,
+      },
+      select: {
+        defenderPlayerRostersPID: true,
+      },
+    });
+    if (isSet) {
+      //스쿼드에 집어넣음
+      if (!checkHaveRouter || checkSquads.defenderPlayerRostersPID != 0) {
+        throw {
+          statusCode: 404,
+          message: '이미 장착중이거나 데이터가 없습니다.',
+        };
+      }
+      //이제 db에 저장하는 트렌직션
+      const striker_data = await prisma.$transaction(
+        async (tx) => {
+          //장착 테이블에 생성
+          const striker_data = await tx.playerEquipRostersData.create({
+            data: {
+              userPID: checkHaveRouter.userPID,
+              playerPID: checkHaveRouter.playerPID,
+              playerEnchant: checkHaveRouter.playerEnchant,
+            },
+          });
+          //생성한값 playerSquadsData 저장
+          await tx.playerSquadsData.update({
+            where: {
+              userPID: userPID,
+            },
+            data: {
+              defenderPlayerRostersPID: striker_data.playerRostersPID,
+            },
+          });
+          //  playerRostersData 있던 값 삭제
+          await tx.playerRostersData.delete({
+            where: {
+              playerRostersPID: playerRostersPID,
+            },
+          });
+          return striker_data;
+        },
+        {
+          isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
+        },
+      );
+      return striker_data;
+    } else {
+      // 해제용도 로직.
+      //장착 체크용
+      const checkEquipRouter = await prisma.playerEquipRostersData.findFirst({
+        whele: {
+          userPID: userPID,
+          playerRostersPID: playerRostersPID,
+        },
+      });
+      if (
+        //장착칸에 지정한 데이터가 없거나 공격수 칸에 지정한 번호랑 다른 사람이 있으면 오류
+        !checkEquipRouter ||
+        checkSquads.defenderPlayerRostersPID != playerRostersPID
+      ) {
+        throw {
+          statusCode: 404,
+          message: '이미 장착중이거나 데이터가 없습니다.',
+        };
+      }
+      if (checkHaveRouter.length > maxHave_Rosters) {
+        throw {
+          statusCode: 400,
+          message: '남은 공간이 없습니다.',
+        };
+      }
+
+      //이제 db에 저장하는 트렌직션
+      const [rosters_data] = await prisma.$transaction(
+        async (tx) => {
+          // 보유 테이블에 생성 값은 지정한 장착한 테이블 값으로
+          const rosters_data = await tx.playerRostersData.create({
+            data: {
+              userPID: checkEquipRouter.userPID,
+              playerPID: checkEquipRouter.playerPID,
+              playerEnchant: checkEquipRouter.playerEnchant,
+            },
+          });
+          // 0값으로 초기화
+          await tx.playerSquadsData.update({
+            where: {
+              userPID: userPID,
+            },
+            data: {
+              defenderPlayerRostersPID: 0,
+            },
+          });
+          // 지정한 키의 값을 가진 장착 테이블 값 삭제
+          await prisma.playerEquipRostersData.delete({
+            whele: {
+              userPID: userPID,
+              playerRostersPID: playerRostersPID,
+            },
+          });
+          return [rosters_data];
+        },
+        {
+          isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
+        },
+      );
+      return rosters_data;
+    }
+  } catch (err) {
+    next(err);
+  }
+};
 export default router;
