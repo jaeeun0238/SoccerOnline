@@ -1,7 +1,6 @@
 import express from 'express';
 import errorMiddleware from './middlewares/error.middleware.js';
 import playersRouter from './routers/player_Router.js';
-import gameRouter from './routers/game_Router.js';
 
 const app = express(); // exoress()함수를 호출해서 app라는 객체생성
 const PORT = 3017; // 서버기 실행될 포트, 3017번 사용

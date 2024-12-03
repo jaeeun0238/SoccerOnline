@@ -23,7 +23,6 @@ model userData {
 
   playerRostersData playerRostersData?
   playerSquadsData  playerSquadsData?
-  gameRecord        gameRecords?
 
   @@map("userData")
 }
@@ -62,14 +61,4 @@ model playerData {
   playerPrice           Int    @default(0) @map("playerPrice")
 
   @@map("playerData")
-}
-
-model gameRecords {
-  gamePID    Int    @id @default(autoincrement()) @map("gamePID")
-  userPID    Int    @unique @map("userPID")
-  gameRecord String @map("gameRecord")
-
-  userdata userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
-
-  @@map("game_Record")
 }
