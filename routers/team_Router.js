@@ -8,11 +8,12 @@ const maxHave_Rosters = 20; //보유할수 있는 최대값
 const maxHave_Squads = 1; //장착 할수 있는 최대값
 
 router.patch(
+  //인증으로 userPID받아오기
   '/team/Set/:positionIndex/what/:playerRostersPID/:userPID',
   async (res, req, next) => {
     const { positionIndex } = req.params.positionIndex;
     const { playerRostersPID } = req.params.playerRostersPID;
-    const { userPID } = req.params;
+    const { userPID } = req.params.userPID;
     let data_temp = {};
     try {
       switch (positionIndex) {
@@ -39,13 +40,13 @@ router.patch(
     }
   },
 );
-//팀 선택창에서 해제
+//팀 선택창에서 해제 //인증으로 userPID받아오기
 router.patch(
   '/team/Get/:positionIndex/what/:playerRostersPID/:userPID',
   async (res, req, next) => {
     const { positionIndex } = req.params.positionIndex;
     const { playerRostersPID } = req.params.playerRostersPID;
-    const { userPID } = req.params;
+    const { userPID } = req.params.userPID;
     let data_temp = {};
     try {
       switch (positionIndex) {
