@@ -18,15 +18,16 @@ router.post('/game-start/:userPID', async (req, res, next) => {
     });
 
     //body에서 입력한 스쿼드PID를 가진 스쿼드정보
-    const enemySquadInfo = await prisma.playersquadsData.findFirst({
+    const enemySquadInfo = await prisma.playerSquadsData.findFirst({
       where: {
-        player_squadsPID: +enemySquad,
+        playerSquadsPID: +enemySquad,
       },
     });
 
     //수정필요
     const mySquadScore = mySquadInfo.strikerPositionPlayerPID.playerAbilityATCK;
-    const enemySquadScore = enemySquadInfo.strikerPosition.playerAbility_ATCK;
+    const enemySquadScore =
+      enemySquadInfo.strikerPositionPlayerPID.playerAbilityATCK;
 
     const maxScore = mySquadScore + enemySquadScore;
 
@@ -37,12 +38,12 @@ router.post('/game-start/:userPID', async (req, res, next) => {
     if (randomValue < mySquadScore) {
       // 유저 승리 처리
       myScore = Math.floor(Math.random() * 4) + 2; // 2에서 5 사이
-      enemyScore = Math.floor(Math.random() * Math.min(3, myScore)); // aScore보다 작은 값을 설정
+      enemyScore = Math.floor(Math.random() * Math.min(3, myScore)); // myScore보다 작은 값을 설정
       result = `승리: 유저 ${myScore} - ${enemyScore} 상대`;
     } else {
       // 상대 유저 승리 처리
       myScore = Math.floor(Math.random() * 4) + 2; // 2에서 5 사이
-      enemyScore = Math.floor(Math.random() * Math.min(3, enemyScore)); // bScore보다 작은 값을 설정
+      enemyScore = Math.floor(Math.random() * Math.min(3, enemyScore)); // enemyScore보다 작은 값을 설정
       result = `패배: 상대 ${enemyScore} - ${myScore} 유저`;
     }
 
