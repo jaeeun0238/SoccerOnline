@@ -25,7 +25,7 @@ router.post('/game-start/:userPID', async (req, res, next) => {
 
   //수정필요
   const mySquadScore = mySquadInfo.strikerPosition.playerAbility_ATCK;
-  const enemySquadScore = enemySquadInfo.strikerPosition.shoot;
+  const enemySquadScore = enemySquadInfo.strikerPosition.playerAbility_ATCK;
 
   const maxScore = mySquadScore + enemySquadScore;
 
@@ -43,7 +43,7 @@ router.post('/game-start/:userPID', async (req, res, next) => {
   }
 
   //게임 전적
-  await prisma.gameRecords.creat({
+  await prisma.game_Records.create({
     data: {
       gameRecord: result,
     },
