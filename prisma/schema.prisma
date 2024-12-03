@@ -41,9 +41,9 @@ model playerRostersData {
 model playerSquadsData {
   playerSquadsPID    Int  @id @default(autoincrement()) @map("playerSquadsPID")
   userPID            Int  @map("userPID")
-  strikerPositionPlayerPID    Int @default(0) @map("strikerPositionPlayerPID")
-  midfielderPositionPlayerPID Int @default(0) @map("midfielderPositionPlayerPID")
-  defenderPositionPlayerPID   Int @default(0) @map("defenderPositionPlayerPID")
+  strikerPlayerRostersPID   Int @default(0) @map("strikerPlayerRostersPID")
+  midfielderPlayerRostersPID Int @default(0) @map("midfielderPlayerRostersPID")
+  defenderPlayerRostersPID   Int @default(0) @map("defenderPlayerRostersPID")
 
   userData userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
 
