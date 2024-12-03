@@ -29,9 +29,9 @@ model userData {
 
 model playerRostersData {
   playerRostersPID Int  @id @default(autoincrement()) @map("playerRostersPID")
-  userPID          Int  @unique @map("userPID")
-  haveRosters      Json @default("[]") @map("haveRosters")
-  maxHaveRosters   Int  @default(20) @map("maxHaveRosters")
+  userPID               Int    @map("userPID")
+  playerPID             Int    @map("playerPID")
+  playerEnchant         Int    @default(0) @map("playerEnchant")
 
   userData userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
 
