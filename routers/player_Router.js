@@ -1,8 +1,5 @@
 import express from 'express';
-<<<<<<< HEAD
 import { PrismaClient } from '@prisma/client';
-=======
->>>>>>> e015615ed0466bbb9fef8ba48c54e02dd45ff7f1
 import { prisma } from '../uts/prisma/index.js';
 
 const router = express.Router();
@@ -41,7 +38,7 @@ router.post('/player/make', async (req, res, next) => {
 
 // 플레이어 뽑기 api
 
-const GACHA_COST = 100; // 1회 가챠 비용 (예시로 100 설정)
+const GachaCosT = 100;  // 1회 가챠 비용 (예시로 100 설정)
 
 // 가챠 함수
 const performGacha = async (userID) => {
@@ -49,53 +46,43 @@ const performGacha = async (userID) => {
     //트랜잭션 추가
     const result = await prisma.$transaction(async (prisma) => {
 
-    // 유저 정보 조회
-    const user = await prisma.user_Data.findUnique({
-      where: { userID },
-    });
+      // 유저 정보 조회
+      const user = await prisma.userData.findUnique({
+        where: { userID },
+      });
 
-    if (!user) {
-      throw new Error('User not found');
-    }
+      if (!user) {
+        throw new Error('User not found');
+      }
 
-    // 유저 캐시 확인
-    if (user.userCash < GACHA_COST) {
-      throw new Error('Not enough cash for gacha');
-    }
+      // 유저 캐시 확인
+      if (user.userCash < GachaCosT) {
+        throw new Error('Not enough cash for gacha');
+      }
 
-    // 캐시 차감
-    const updatedUser = await prisma.user_Data.update({
-      where: { userID },
-      data: {
-        userCash: user.userCash - GACHA_COST, // 가챠 비용 차감
-      },
-    });
-
-    // player_Data에서 랜덤한 선수 선택
-    const players = await prisma.player_Data.findMany();
-    const randomPlayer = players[Math.floor(Math.random() * players.length)];
-
-    // 해당 유저의 player_rosters_Data에 선택한 선수 추가
-    const playerRoster = await prisma.player_rosters_Data.upsert({
-      where: { userPID: user.userPID },
-      update: {
-        have_Rosters: {
-          push: {
-            playerPID: randomPlayer.playerPID,
-            playerName: randomPlayer.playerName,
-          }, // 선수 추가
+      // 캐시 차감
+      const updatedUser = await prisma.userData.update({
+        where: { userID },
+        data: {
+          userCash: user.userCash - GachaCosT,  // 가챠 비용 차감
         },
-      },
-      create: {
-        userPID: user.userPID,
-        have_Rosters: [
-          {
-            playerPID: randomPlayer.playerPID,
-            playerName: randomPlayer.playerName,
-          },
-        ], // 선수 추가
-      },
-    });
+      });
+
+      // playerData에서 랜덤한 선수 선택
+      const players = await prisma.playerData.findMany();
+      const randomPlayer = players[Math.floor(Math.random() * players.length)];
+
+      // 해당 유저의 playerRostersData에 선택한 선수 추가
+      const playerRoster = await prisma.playerRostersData.upsert({
+        where: { userPID: user.userPID },
+        update: {
+          playerPID: randomPlayer.playerPID,
+        },
+        create: {
+          userPID: user.userPID,
+          playerPID: randomPlayer.playerPID,  // 선수 추가
+        },
+      });
       return {
         updatedUser,
         randomPlayer,
@@ -118,11 +105,7 @@ const performGacha = async (userID) => {
 };
 
 // 선수 뽑기 API
-<<<<<<< HEAD
-router.post('/player/gacha', async (req, res) => {
-=======
 router.post('/api/player/gacha', async (req, res) => {
->>>>>>> e015615ed0466bbb9fef8ba48c54e02dd45ff7f1
   const { userID } = req.body;
 
   const result = await performGacha(userID);

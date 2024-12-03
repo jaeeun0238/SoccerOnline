@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,40 +8,39 @@ datasource db {
 }
 
 model userData {
-  userPID      Int    @id @default(autoincrement()) @map("userPID")
-  userID       String @unique @map("userID")
-  userName     String @unique @map("userName")
-  userPassword String @map("userPassword")
-  userScore    Int    @map("userScore")
-  userCash     Int    @map("userCash")
-
-  playerRostersData playerRostersData[]
-  playerSquadsData  playerSquadsData[]
+  userPID                Int                      @id @default(autoincrement()) @map("userPID")
+  userID                 String                   @unique @map("userID")
+  userName               String                   @unique @map("userName")
+  userPassword           String                   @map("userPassword")
+  userScore              Int                      @map("userScore")
+  userCash               Int                      @map("userCash")
+  playerEquipRostersData playerEquipRostersData[]
+  playerRostersData      playerRostersData[]
+  playerSquadsData       playerSquadsData[]
 
   @@map("userData")
 }
 
 model playerRostersData {
-  playerRostersPID Int  @id @default(autoincrement()) @map("playerRostersPID")
-  userPID               Int    @map("userPID")
-  playerPID             Int    @map("playerPID")
-  playerEnchant         Int    @default(0) @map("playerEnchant")
+  playerRostersPID Int      @id @default(autoincrement()) @map("playerRostersPID")
+  userPID          Int      @map("userPID")
+  playerPID        Int      @map("playerPID")
+  playerEnchant    Int      @default(0) @map("playerEnchant")
+  userData         userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade)
 
-  userData userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
-  
+  @@index([userPID], map: "playerRostersData_userPID_fkey")
   @@map("playerRostersData")
 }
 
-
 model playerSquadsData {
-  playerSquadsPID    Int  @id @default(autoincrement()) @map("playerSquadsPID")
-  userPID            Int  @map("userPID")
-  strikerPositionPlayerPID    Int @default(0) @map("strikerPositionPlayerPID")
-  midfielderPositionPlayerPID Int @default(0) @map("midfielderPositionPlayerPID")
-  defenderPositionPlayerPID   Int @default(0) @map("defenderPositionPlayerPID")
+  playerSquadsPID            Int      @id @default(autoincrement()) @map("playerSquadsPID")
+  userPID                    Int      @map("userPID")
+  strikerPlayerRostersPID    Int      @default(0)
+  midfielderPlayerRostersPID Int      @default(0)
+  defenderPlayerRostersPID   Int      @default(0)
+  userData                   userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade)
 
-  userData userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
-
+  @@index([userPID], map: "playerSquadsData_userPID_fkey")
   @@map("playerSquadsData")
 }
 
@@ -61,4 +54,14 @@ model playerData {
   playerPrice           Int    @default(0) @map("playerPrice")
 
   @@map("playerData")
+}
+
+model playerEquipRostersData {
+  playerRostersPID Int      @id @default(autoincrement())
+  userPID          Int
+  playerPID        Int
+  playerEnchant    Int      @default(0)
+  userData         userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade)
+
+  @@index([userPID], map: "playerEquipRostersData_userPID_fkey")
 }
