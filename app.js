@@ -5,7 +5,9 @@ import userRouter from './routers/user_Router.js';
 import playersRouter from './routers/player_Router.js';
 import gameRouter from './routers/game_Router.js';
 import teamRouter from './routers/team_Router.js';
+import dotenv from 'dotenv';
 
+dotenv.config();
 const app = express(); // exoress()함수를 호출해서 app라는 객체생성
 const PORT = 3017; // 서버가 실행될 포트, 3017번 사용
 
