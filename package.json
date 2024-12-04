@@ -4,6 +4,9 @@
   "main": "app.js",
   "license": "MIT",
   "type": "module",
+  "scripts": {
+    "test": "mocha"
+  },
   "dependencies": {
     "@prisma/client": "^6.0.0",
     "bcrypt": "^5.1.1",
@@ -12,5 +15,11 @@
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "prisma": "^6.0.0"
+  },
+  "devDependencies": {
+    "chai": "^5.1.2",
+    "chai-http": "^5.1.1",
+    "mocha": "^11.0.1",
+    "supertest": "^7.0.0"
   }
 }

@@ -92,7 +92,11 @@
     "editor.defaultFormatter": "ms-dotnettools.csharp",
     "editor.tabSize": 2,
     "editor.insertSpaces": true
-  }
+  },
+  "testing.defaultTestFramework": "mocha",
+  "mochaExplorer.files": [
+    "mocha_test/**/*.js"
+  ]
   // "typescript.inlayHints.enumMemberValues.enabled": true,
   // "javascript.inlayHints.enumMemberValues.enabled": true,
   // "javascript.inlayHints.functionLikeReturnTypes.enabled": true,
