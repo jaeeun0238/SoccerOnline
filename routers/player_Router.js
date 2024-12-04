@@ -4,6 +4,7 @@ import authenticateJWT from '../middlewares/auth.middleware.js';
 import { prisma } from '../uts/prisma/index.js';
 
 const router = express.Router();
+
 // 플레이어생성 api
 router.post('/player/make', async (req, res, next) => {
   try {
@@ -42,14 +43,14 @@ router.post('/player/make', async (req, res, next) => {
 const gachaCosT = 100;  // 1회 가챠 비용 (예시로 100 설정)
 
 // 가챠 함수
-const performGacha = async (userPID) => {
+const performGacha = async (userID) => {
   try {
     //트랜잭션 추가
     const result = await prisma.$transaction(async (prisma) => {
 
       // 유저 정보 조회
       const user = await prisma.userData.findUnique({
-        where: { userPID },
+        where: { userID },
       });
 
       if (!user) {
@@ -63,7 +64,7 @@ const performGacha = async (userPID) => {
 
       // 캐시 차감
       const updatedUser = await prisma.userData.update({
-        where: { userPID },
+        where: { userID },
         data: {
           userCash: user.userCash - gachaCosT,  // 가챠 비용 차감
         },
@@ -104,9 +105,9 @@ const performGacha = async (userPID) => {
 
 // 선수 뽑기 API
 router.post('/player/gacha', authenticateJWT, async (req, res) => {
-  const { userPID } = req.user;
+  const { userID } = req.user.userPID;
 
-  const result = await performGacha(userPID);
+  const result = await performGacha(userID);
 
   if (result.error) {
     return res.status(400).json({ error: result.error });
