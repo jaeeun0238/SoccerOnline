@@ -155,21 +155,9 @@ router.post('/game-start/:userPID', async (req, res, next) => {
 
 router.post('/game-start/:userPlayerPID', async (req, res, next) => {
   try {
-    const myTeam = req.params.userPlayerPID;
-    const enemyTeam = req.body.playerPID;
-    // const myStriker = await prisma.playerData.findFirst({
-    //   where: {
-    //     playerPID: +myTeam,
-    //   },
-    // });
-    // const enemyStriker = await prisma.playerData.findFirst({
-    //   where: {
-    //     playerPID: +enemyTeam,
-    //   },
-    // });
     const myStriker = {
       playerName: 'testA',
-      playerAbilityATCK: 5,
+      playerAbilityATCK: 10,
     };
     const enemyStriker = {
       playerName: 'testB',
@@ -193,7 +181,20 @@ router.post('/game-start/:userPlayerPID', async (req, res, next) => {
     const defenderValue = Math.random() * maxDefenderScore;
 
     let resultMessage = '';
-
+    const gameTable = await prisma.gameSession.findFirst({
+      where: {
+        gameSessionPID,
+      },
+    });
+    if (!gameTable) {
+      const gameSession = await prisma.gameSession.create({
+        data: {
+          myScore: 0,
+          enemyScore: 0,
+        },
+      });
+    }
+    await prisma.gameSession.update({});
     // 공격수 시도
     if (strikerValue < myStriker.playerAbilityATCK) {
       resultMessage += `유저의 ${myStriker.playerName} 선수가 상대 ${enemyStriker.playerName} 선수를 뚫고 지나갑니다. `;
