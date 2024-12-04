@@ -24,7 +24,10 @@ router.post('/game-start/:userPID', async (req, res, next) => {
       },
     });
     if (!enemyRosterInfo) {
-      return res.status(404).json({ error: '스쿼드를 찾을수 없습니다' });
+      throw {
+        status: 404,
+        message: '스쿼드가 존재하지 않습니다.',
+      };
     }
 
     //유저의 스트라이커장착 로스터
@@ -153,7 +156,7 @@ router.post('/game-start/:userPID', async (req, res, next) => {
 */
 //test
 
-router.post('/game-start/:userPlayerPID', async (req, res, next) => {
+router.post('/game-start', async (req, res, next) => {
   try {
     const myStriker = {
       playerName: 'testA',
@@ -181,20 +184,20 @@ router.post('/game-start/:userPlayerPID', async (req, res, next) => {
     const defenderValue = Math.random() * maxDefenderScore;
 
     let resultMessage = '';
-    const gameTable = await prisma.gameSession.findFirst({
-      where: {
-        gameSessionPID,
-      },
-    });
-    if (!gameTable) {
-      const gameSession = await prisma.gameSession.create({
-        data: {
-          myScore: 0,
-          enemyScore: 0,
-        },
-      });
-    }
-    await prisma.gameSession.update({});
+    // const gameTable = await prisma.gameSession.findFirst({
+    //   where: {
+    //     gameSessionPID,
+    //   },
+    // });
+    // if (!gameTable) {
+    //   const gameSession = await prisma.gameSession.create({
+    //     data: {
+    //       myScore: 0,
+    //       enemyScore: 0,
+    //     },
+    //   });
+    // }
+    // await prisma.gameSession.update({});
     // 공격수 시도
     if (strikerValue < myStriker.playerAbilityATCK) {
       resultMessage += `유저의 ${myStriker.playerName} 선수가 상대 ${enemyStriker.playerName} 선수를 뚫고 지나갑니다. `;
