@@ -92,7 +92,7 @@ const performGacha = async (userID) => {
       Congratulations! You got ${result.randomPlayer.playerName}!
       🌟✨🌟✨🌟✨🌟
       `,
-      player: randomPlayer,
+      player: result.randomPlayer,
     };
   } catch (error) {
     return {
