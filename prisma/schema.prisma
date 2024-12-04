@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -28,25 +22,38 @@ model userData {
 }
 
 model playerRostersData {
-  playerRostersPID Int @id @default(autoincrement()) @map("playerRostersPID")
-  userPID          Int @map("userPID")
-  playerPID        Int @map("playerPID")
-  playerEnchant    Int @default(0) @map("playerEnchant")
-
-  userData userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
+  playerRostersPID       Int                      @id @default(autoincrement()) @map("playerRostersPID")
+  userPID                Int                      @map("userPID")
+  playerPID              Int                      @map("playerPID")
+  playerEnchant          Int                      @default(0) @map("playerEnchant")
+  userData               userData                 @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
+  playerEquipRostersData playerEquipRostersData[]
 
   @@map("playerRostersData")
 }
 
+model playerEquipRostersData {
+  playerEquipRostersPID Int @id @default(autoincrement()) @map("playerEquipRostersPID")
+  playerSquadsPID       Int @map("playerSquadsPID")
+  playerRostersPID      Int @map("playerRostersPID")
+  position              Int @map("position") // 0: striker, 1: midfielder, 2: defender
+
+  playerRostersData playerRostersData @relation(fields: [playerRostersPID], references: [playerRostersPID], onDelete: Cascade, onUpdate: Cascade)
+  playerSquadsData  playerSquadsData  @relation(fields: [playerSquadsPID], references: [playerSquadsPID], onDelete: Cascade, onUpdate: Cascade)
+  //userData userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("playerEquipRostersData")
+}
+
 model playerSquadsData {
-  playerSquadsPID             Int @id @default(autoincrement()) @map("playerSquadsPID")
-  userPID                     Int @map("userPID")
-  strikerPositionPlayerPID    Int @default(0) @map("strikerPositionPlayerPID")
-  midfielderPositionPlayerPID Int @default(0) @map("midfielderPositionPlayerPID")
-  defenderPositionPlayerPID   Int @default(0) @map("defenderPositionPlayerPID")
+  playerSquadsPID Int @id @default(autoincrement()) @map("playerSquadsPID")
+  userPID         Int @map("userPID")
 
   userData userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
 
+  playerEquipRostersData playerEquipRostersData[]
+
+  @@index([userPID], map: "playerSquadsData_userPID_fkey")
   @@map("playerSquadsData")
 }
 
