@@ -176,36 +176,47 @@ router.post('/game-start/:userPlayerPID', async (req, res, next) => {
       playerAbilityATCK: 10,
     };
 
-    const myStrikerScore = myStriker.playerAbilityATCK;
-    const enemyStrikerScore = enemyStriker.playerAbilityATCK;
+    const myMidfielder = { playerName: 'midA', playerAbilityATCK: 7 }; // 미드필더 예시
+    const myDefender = { playerName: 'defA', playerAbilityATCK: 4 }; // 수비수 예시
+    const enemyMidfielder = { playerName: 'midB', playerAbilityATCK: 6 }; // 적 미드필더 예시
+    const enemyDefender = { playerName: 'defB', playerAbilityATCK: 5 }; // 적 수비수 예시
 
-    const maxStrikerScore = myStrikerScore + enemyStrikerScore;
+    const maxStrikerScore =
+      myStriker.playerAbilityATCK + enemyStriker.playerAbilityATCK;
+    const maxMidfielderScore =
+      myMidfielder.playerAbilityATCK + enemyMidfielder.playerAbilityATCK;
+    const maxDefenderScore =
+      myDefender.playerAbilityATCK + enemyDefender.playerAbilityATCK;
 
-    const strikerValues = [
-      Math.random() * maxStrikerScore,
-      Math.random() * maxStrikerScore,
-      Math.random() * maxStrikerScore,
-    ];
+    const strikerValue = Math.random() * maxStrikerScore;
+    const midfielderValue = Math.random() * maxMidfielderScore;
+    const defenderValue = Math.random() * maxDefenderScore;
 
-    let progress = 0;
+    let resultMessage = '';
 
-    const attemptStrikerPass = (value) => {
-      if (value < myStrikerScore) {
-        progress += 1;
-        return `유저의 ${myStriker.playerName} 선수가 상대 ${enemyStriker.playerName} 선수를 뚫고 지나갑니다.`;
+    // 공격수 시도
+    if (strikerValue < myStriker.playerAbilityATCK) {
+      resultMessage += `유저의 ${myStriker.playerName} 선수가 상대 ${enemyStriker.playerName} 선수를 뚫고 지나갑니다. `;
+
+      // 미드필더 시도
+      if (midfielderValue < myMidfielder.playerAbilityATCK) {
+        resultMessage += `유저의 ${myMidfielder.playerName} 선수가 상대 ${enemyMidfielder.playerName} 선수를 뚫고 지나갑니다. `;
+
+        // 수비수 시도
+        if (defenderValue < myDefender.playerAbilityATCK) {
+          resultMessage += `유저의 ${myDefender.playerName} 선수가 상대 ${enemyDefender.playerName} 선수를 뚫고 골을 넣었습니다!`;
+        } else {
+          resultMessage += '수비수에게 막혔습니다. 상대 공격수의 차례입니다.';
+        }
       } else {
-        progress -= 1;
-        return '상대 선수를 뚫는데 실패';
+        resultMessage += '미드필더에게 막혔습니다. 상대 공격수의 차례입니다.';
       }
-    };
-
-    for (const value of strikerValues) {
-      const message = attemptStrikerPass(value);
-      res.status(200).json({ message });
-      if (progress >= 3) break; // 모든 시도가 성공했을 경우 종료
+    } else {
+      resultMessage += '공격수에게 막혔습니다. 상대 공격수의 차례입니다.';
     }
-    const result = await prisma.gameSession.create({});
-    return res.status(200).json({ 게임결과: result });
+
+    // 최종 결과를 한 번만 응답
+    res.status(200).json({ message: resultMessage });
   } catch (err) {
     next(err);
   }
