@@ -3,7 +3,7 @@
 // 일단 붙여놓기함
 // 모듈 가져오기
 import jwt from 'jsonwebtoken';
-import { prisma } from '../utils/prisma/index.js';
+import { prisma } from '../uts/prisma/index.js';
 
 // 미들웨어 함수 정의
 export default async function (req, res, next) {

@@ -1,6 +1,8 @@
 import express from 'express';
 import { prisma } from '../uts/prisma/index.js';
 import errModel from '../middlewares/error.middleware.js';
+import authMiddleware from '../middlewares/auth.middleware.js';
+import bcrypt from 'bcrypt';
 
 const router = express.Router();
 // 회원가입api
