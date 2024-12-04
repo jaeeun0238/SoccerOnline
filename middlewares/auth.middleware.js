@@ -8,7 +8,7 @@ import { prisma } from '../uts/prisma/index.js';
 export default async function (req, res, next) {
   // 토큰 확인
   try {
-    const { authorization } = req.body;
+    const authorization = req.headers['authorization'];
     if (!authorization) throw new Error('토큰이 존재하지 않습니다.');
     // 토큰 타입 및 값 분리
     const [tokenType, token] = authorization.split(' ');
