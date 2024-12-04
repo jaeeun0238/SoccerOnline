@@ -1,5 +1,6 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
+import { authenticateJWT } from '../middlewares/auth.middleware.js';
 import { prisma } from '../uts/prisma/index.js';
 
 const router = express.Router();
@@ -102,8 +103,8 @@ const performGacha = async (userID) => {
 };
 
 // 선수 뽑기 API
-router.post('/player/gacha', async (req, res) => {
-  const { userID } = req.body;
+router.post('/player/gacha', authenticateJWT, async (req, res) => {
+  const { userID } = req.user.userPID;
 
   const result = await performGacha(userID);
 
