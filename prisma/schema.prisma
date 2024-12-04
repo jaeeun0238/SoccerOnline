@@ -33,14 +33,19 @@ model playerRostersData {
   @@map("playerRostersData")
 }
 
+// playerEquipRostersPID | playerSquadsPID | playerRostersPID | position
+//          1                     10              100              0   
+//          2                     10              101              1
+//          3                     10              102              2
+
 model playerEquipRostersData {
   playerEquipRostersPID Int @id @default(autoincrement()) @map("playerEquipRostersPID")
   playerSquadsPID       Int @map("playerSquadsPID")
   playerRostersPID      Int @map("playerRostersPID")
   position              Int @map("position") // 0: striker, 1: midfielder, 2: defender
 
-  playerRostersData playerRostersData @relation(fields: [playerRostersPID], references: [playerRostersPID], onDelete: Cascade, onUpdate: Cascade)
   playerSquadsData  playerSquadsData  @relation(fields: [playerSquadsPID], references: [playerSquadsPID], onDelete: Cascade, onUpdate: Cascade)
+  playerRostersData playerRostersData @relation(fields: [playerRostersPID], references: [playerRostersPID], onDelete: Cascade, onUpdate: Cascade)
   //userData userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("playerEquipRostersData")
@@ -59,7 +64,7 @@ model playerSquadsData {
 }
 
 model playerData {
-  playerPID             Int    @id @default(autoincrement()) @map("playerPID")
+  playerPID             Int    @map("playerPID")
   playerName            String @unique @map("playerName")
   playerAbilityATCK     Int    @map("playerAbilityATCK")
   playerAbilityDEFEND   Int    @map("playerAbilityDEFEND")
