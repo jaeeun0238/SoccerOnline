@@ -4,33 +4,31 @@ import authenticateJWT from '../middlewares/auth.middleware.js';
 import { prisma } from '../uts/prisma/index.js';
 
 const router = express.Router();
-
 // 플레이어생성 api
 router.post('/player/make', async (req, res, next) => {
   try {
     //body로 전달 받은 객체 구조분해할당
     const {
+      playerPID,
       playerName,
       playerAbilityATCK,
       playerAbilityDEFEND,
       playerAbilityMOBILITY,
     } = req.body;
-    const player = await prisma.playerData.create({
-      data: {
-        playerName,
-        playerAbilityATCK,
-        playerAbilityDEFEND,
-        playerAbilityMOBILITY,
-      },
+    await prisma.$transaction(async (tranPrisma) => {
+      const player = await tranPrisma.playerData.create({
+        data: {
+          playerPID,
+          playerName,
+          playerAbilityATCK,
+          playerAbilityDEFEND,
+          playerAbilityMOBILITY,
+        },
+      });
     });
-
     // 성공시 전달 받은
     return res.status(201).json({
-      message: `성공적으로 선수를 생성하였습니다. 
-        선수 이름 : ${playerName}
-        공격력 : ${playerAbilityATCK}
-        수비력 : ${playerAbilityDEFEND}
-        속력 : ${playerAbilityMOBILITY}
+      message: `성공적으로 선수를 생성하였습니다. 선수ID : ${playerPID} 선수 이름 : ${playerName}  공격력 : ${playerAbilityATCK} 수비력 : ${playerAbilityDEFEND} 속력 : ${playerAbilityMOBILITY}
         `,
     });
   } catch (err) {
@@ -40,14 +38,13 @@ router.post('/player/make', async (req, res, next) => {
 
 // 플레이어 뽑기 api
 
-const gachaCosT = 100;  // 1회 가챠 비용 (예시로 100 설정)
+const gachaCosT = 100; // 1회 가챠 비용 (예시로 100 설정)
 
 // 가챠 함수
 const performGacha = async (userID) => {
   try {
     //트랜잭션 추가
     const result = await prisma.$transaction(async (prisma) => {
-
       // 유저 정보 조회
       const user = await prisma.userData.findUnique({
         where: { userID },
@@ -66,7 +63,7 @@ const performGacha = async (userID) => {
       const updatedUser = await prisma.userData.update({
         where: { userID },
         data: {
-          userCash: user.userCash - gachaCosT,  // 가챠 비용 차감
+          userCash: user.userCash - gachaCosT, // 가챠 비용 차감
         },
       });
 
@@ -105,7 +102,7 @@ const performGacha = async (userID) => {
 
 // 선수 뽑기 API
 router.post('/player/gacha', authenticateJWT, async (req, res) => {
-  const { userID } = req.user.userPID;
+  const { userID } = req.user;
 
   const result = await performGacha(userID);
 

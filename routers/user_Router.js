@@ -8,7 +8,7 @@ import authMiddleware from '../middlewares/auth.middleware.js';
 const router = express.Router();
 // 회원가입api
 /** 사용자 회원가입 API **/
-router.post('/sign-up', async (req, res) => {
+router.post('/sign-up', async (req, res, next) => {
   const { userID, userName, userPassword } = req.body;
 
   try {
@@ -39,10 +39,11 @@ router.post('/sign-up', async (req, res) => {
     });
 
     return res.status(201).json({ message: '회원가입이 완료되었습니다.' });
-  } catch (error) {
+  } catch (err) {
+    next(err);
     // 오류 처리 시작 (변경된 부분)
-    console.error(error); // 오류 로그 출력 (변경된 부분)
-    return res.status(500).json({ message: '서버 오류가 발생했습니다.' }); // 오류 응답 반환 (변경된 부분)
+    // console.error(error); // 오류 로그 출력 (변경된 부분)
+    // return res.status(500).json({ message: '서버 오류가 발생했습니다.' }); // 오류 응답 반환 (변경된 부분)
   }
 });
 
