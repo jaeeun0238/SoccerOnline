@@ -51,11 +51,11 @@ router.post('/game-start/:userPID', async (req, res, next) => {
     }
 
     //게임 전적
-    await prisma.game_Records.create({
-      data: {
-        gameRecord: result,
-      },
-    });
+    // await prisma.gameRecords.create({
+    //   data: {
+    //     gameRecord: result,
+    //   },
+    // });
     return res.status(200).json({ data: result });
   } catch (err) {
     next(err);

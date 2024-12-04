@@ -18,6 +18,7 @@ model userData {
   playerRostersData playerRostersData[]
   playerSquadsData  playerSquadsData[]
 
+
   @@map("userData")
 }
 
@@ -26,14 +27,15 @@ model playerRostersData {
   userPID          Int @map("userPID")
   playerPID        Int @map("playerPID")
   playerEnchant    Int @default(0) @map("playerEnchant")
-
   userData               userData                 @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
   playerEquipRostersData playerEquipRostersData[]
+
 
   @@map("playerRostersData")
 }
 
 model playerEquipRostersData {
+
   playerEquipRostersPID Int @id @default(autoincrement()) @map("playerEquipRostersPID")
   playerSquadsPID       Int @map("playerSquadsPID")
   playerRostersPID      Int @map("playerRostersPID")
@@ -47,8 +49,10 @@ model playerEquipRostersData {
 }
 
 model playerSquadsData {
+
   playerSquadsPID Int @id @default(autoincrement()) @map("playerSquadsPID")
   userPID         Int @map("userPID")
+
 
   userData userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
 
