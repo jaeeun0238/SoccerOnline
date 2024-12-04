@@ -73,16 +73,13 @@ const performGacha = async (userID) => {
       const randomPlayer = players[Math.floor(Math.random() * players.length)];
 
       // 해당 유저의 playerRostersData에 선택한 선수 추가
-      const playerRoster = await prisma.playerRostersData.upsert({
-        where: { userPID: user.userPID },
-        update: {
-          playerPID: randomPlayer.playerPID,
-        },
-        create: {
+      const playerRoster = await prisma.playerRostersData.create({
+        data: {
           userPID: user.userPID,
-          playerPID: randomPlayer.playerPID,  // 선수 추가
+          playerPID: randomPlayer.playerPID, // 각 선수마다 고유 ID
         },
       });
+
       return {
         updatedUser,
         randomPlayer,
