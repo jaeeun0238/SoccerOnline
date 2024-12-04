@@ -72,7 +72,12 @@ router.post('/sign-in', async (req, res, next) => {
 
   // 헤더로 주고받게 바꾸기
   res.setHeader('authorization', `Bearer ${token}`);
-  return res.status(200).json({ message: '로그인 성공' });
+  return res.status(200).json({
+    message: '로그인 성공',
+    user: {
+      userID: user.userID,
+    },
+  });
 });
 
 // 캐시 구매
