@@ -1,8 +1,8 @@
 import express from 'express';
 import { prisma } from '../uts/prisma/index.js';
 import errModel from '../middlewares/error.middleware.js';
-import authMiddleware from '../middlewares/auth.middleware.js';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 const router = express.Router();
 // 회원가입api
@@ -59,16 +59,18 @@ router.post('/sign-in', async (req, res, next) => {
     return res.status(401).json({ message: '비밀번호가 일치하지 않습니다.' });
 
   // 로그인에 성공하면, 사용자의 userId를 바탕으로 토큰을 생성합니다.
+  console.log(process.env.JWT_KEY);
+
   const token = jwt.sign(
     {
       userPID: user.userPID,
     },
-    process.env.JWT_SECRET, // 비밀 키를 환경 변수에서 가져옴
+    process.env.JWT_KEY, // 비밀 키를 환경 변수에서 가져옴
     { expiresIn: '1h' }, // 토큰의 만료 시간을 설정 (1시간)
   );
 
-  // authotization 쿠키에 Berer 토큰 형식으로 JWT를 저장합니다.
-  res.cookie('authorization', `Bearer ${token}`);
+  // 헤더로 주고받게 바꾸기
+  res.setHeader('authorization', `Bearer ${token}`);
   return res.status(200).json({ message: '로그인 성공' });
 });
 
@@ -76,7 +78,8 @@ router.post('/sign-in', async (req, res, next) => {
 router.patch('/buyCash/:userPID', async (req, res, next) => {
   try {
     const { userPID } = req.params;
-    const { cash } = req.body; // 예시로 body에 '"cash": 5000'으로 되어있는걸 가져옴
+    const { cash } = req.body;
+    // 예시로 body에 '"cash": 5000'으로 되어있는걸 가져옴
     // const authorization = req.headers['authorization']; // header에 'authorization' 값 가져옴
     // const [tokenType, token] = authorization.split(' '); // bearer과 token값 객체구조분해 할당
 
