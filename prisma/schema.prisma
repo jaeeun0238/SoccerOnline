@@ -17,42 +17,42 @@ model userData {
 
   playerRostersData playerRostersData[]
   playerSquadsData  playerSquadsData[]
-  playerEquipRostersData playerEquipRostersData[]
 
   @@map("userData")
 }
 
 model playerRostersData {
-  playerRostersPID Int  @id @default(autoincrement()) @map("playerRostersPID")
-  userPID               Int    @map("userPID")
-  playerPID             Int    @map("playerPID")
-  playerEnchant         Int    @default(0) @map("playerEnchant")
+  playerRostersPID Int @id @default(autoincrement()) @map("playerRostersPID")
+  userPID          Int @map("userPID")
+  playerPID        Int @map("playerPID")
+  playerEnchant    Int @default(0) @map("playerEnchant")
 
-  userData userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
-  
+  userData               userData                 @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
+  playerEquipRostersData playerEquipRostersData[]
+
   @@map("playerRostersData")
 }
 
 model playerEquipRostersData {
-  playerRostersPID Int  @id @default(autoincrement()) @map("playerRostersPID")
-  userPID               Int    @map("userPID")
-  playerPID             Int    @map("playerPID")
-  playerEnchant         Int    @default(0) @map("playerEnchant")
+  playerEquipRostersPID Int @id @default(autoincrement()) @map("playerEquipRostersPID")
+  playerSquadsPID       Int @map("playerSquadsPID")
+  playerRostersPID      Int @map("playerRostersPID")
+  position              Int @map("position") // 0: striker, 1: midfielder, 2: defender
 
-  userData userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
-  
+  playerRostersData playerRostersData @relation(fields: [playerRostersPID], references: [playerRostersPID], onDelete: Cascade, onUpdate: Cascade)
+  playerSquadsData  playerSquadsData  @relation(fields: [playerSquadsPID], references: [playerSquadsPID], onDelete: Cascade, onUpdate: Cascade)
+  //userData userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
+
   @@map("playerEquipRostersData")
 }
 
-
 model playerSquadsData {
-  playerSquadsPID    Int  @id @default(autoincrement()) @map("playerSquadsPID")
-  userPID            Int  @map("userPID")
-  strikerPlayerRostersPID   Int @default(0) @map("strikerPlayerRostersPID")
-  midfielderPlayerRostersPID Int @default(0) @map("midfielderPlayerRostersPID")
-  defenderPlayerRostersPID   Int @default(0) @map("defenderPlayerRostersPID")
+  playerSquadsPID Int @id @default(autoincrement()) @map("playerSquadsPID")
+  userPID         Int @map("userPID")
 
   userData userData @relation(fields: [userPID], references: [userPID], onDelete: Cascade, onUpdate: Cascade)
+
+  playerEquipRostersData playerEquipRostersData[]
 
   @@index([userPID], map: "playerSquadsData_userPID_fkey")
   @@map("playerSquadsData")
