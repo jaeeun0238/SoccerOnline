@@ -68,3 +68,12 @@ model playerData {
 
   @@map("playerData")
 }
+
+model gameSession {
+  gameSessionPID Int @id @default(autoincrement()) @map("gameSessionPID")
+  myScore        Int @map("myScore")
+  enemyScore     Int @map("enemyScore")
+  turn           Int @map("turn")
+
+  @@map("gameSession")
+}
