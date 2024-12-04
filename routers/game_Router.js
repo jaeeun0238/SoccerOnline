@@ -8,7 +8,7 @@ const router = express.Router();
 //게임 생성                 //유저인증
 router.post('/game-start', authMiddleware, async (req, res, next) => {
   try {
-    const mySquad = req.user;
+    const mySquad = req.user.userPID;
     const enemySquad = req.body.playerSquadsPID;
 
     //인증된 유저PID를 가지고 있는 스쿼드정보
