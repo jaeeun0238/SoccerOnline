@@ -37,7 +37,7 @@ router.post('/sign-up', async (req, res, next) => {
           userID,
           userName,
           userPassword: bcryptPassword,
-          userScore: 0,
+          userScore: 1000,
           userCash: 5000,
         },
       });
