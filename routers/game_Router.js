@@ -1,6 +1,7 @@
 /* 기본 게임 기능 */
 import express from 'express';
 import { prisma } from '../uts/prisma/index.js';
+import authMiddleware from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 /*
@@ -155,20 +156,20 @@ router.post('/game-start/:userPID', async (req, res, next) => {
 });
 */
 //test
+
 //게임 매칭 완성
-router.post('/game/match/', async (req, res, next) => {
-  const user1 = 15;
-  //기본 스코어 나중에 인증에서 받아올 예정
-  const default_user_score = 0;
+router.post('/game/match', authMiddleware, async (req, res, next) => {
+  const user_1 = req.user.userPID;
+  const user_1_score = req.user.userScore;
   try {
     //스코어 계산
-    const max_score = default_user_score + 500;
-    const min_score = default_user_score - 500;
+    const max_score = user_1_score + 500;
+    const min_score = user_1_score - 500;
     //스코어에 어울리는 사람 찾기
-    const user2 = await prisma.userData.findFirst({
+    const user_2 = await prisma.userData.findFirst({
       where: {
         NOT: {
-          userPID: user1,
+          userPID: user_1,
         },
         gameSessionPID: null,
         userScore: {
@@ -180,9 +181,8 @@ router.post('/game/match/', async (req, res, next) => {
         userPID: true,
       },
     });
-    console.log(user2);
     //매칭 실패
-    if (!user2) {
+    if (!user_2) {
       throw { status: 404, message: ' 적합한 유저를 찾지 못했습니다. ' };
     }
     //성공시 트렌잭션으로 생성하고 플레이어 데이터에 pid 추가
@@ -196,7 +196,7 @@ router.post('/game/match/', async (req, res, next) => {
       });
       await tx.userData.update({
         where: {
-          userPID: user1,
+          userPID: user_1,
         },
         data: {
           gameSessionPID: game.gameSessionPID,
@@ -204,7 +204,7 @@ router.post('/game/match/', async (req, res, next) => {
       });
       await tx.userData.update({
         where: {
-          userPID: user2.userPID,
+          userPID: user_2.userPID,
         },
         data: {
           gameSessionPID: game.gameSessionPID,
@@ -220,6 +220,7 @@ router.post('/game/match/', async (req, res, next) => {
     next(err);
   }
 });
+
 router.post('/game-start', async (req, res, next) => {
   try {
     const { gameSessionPID } = req.body;
