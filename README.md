@@ -47,7 +47,8 @@ $ node app.js
 ### Environment
 ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-007ACC?style=for-the-badge&logo=Visual%20Studio%20Code&logoColor=white)
 ![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=Git&logoColor=white)
-![Github](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=GitHub&logoColor=white)             
+![Github](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=GitHub&logoColor=white)
+![insomnia](https://img.shields.io/badge/Insomnia-4000BF?style=for-the-badge&logo=Insomnia&logoColor=white)
 
 ### Config
 ![npm](https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)        
@@ -55,3 +56,44 @@ $ node app.js
 ### Development
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=Javascript&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=Node.js&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=Prisma&logoColor=white)
+![AmazonRDS](https://img.shields.io/badge/AmazonRDS-527FFF?style=for-the-badge&logo=AmazonRDS&logoColor=white)
+
+
+<br>
+
+   <h3> 📌 기능 소개 </h3>
+   <br>
+   
+<details>
+  <summary>유재윤</summary>
+  설명이나 추가 정보를 여기에 넣습니다.
+</details>
+
+<details>
+  <summary>조상우</summary>
+  설명이나 추가 정보를 여기에 넣습니다.
+</details>
+
+<details>
+  <summary>김지웅</summary>
+  설명이나 추가 정보를 여기에 넣습니다.
+</details>
+
+<details>
+  <summary>박성욱</summary>
+  설명이나 추가 정보를 여기에 넣습니다.
+</details>
+
+<details>
+  <summary>정찬식</summary>
+  설명이나 추가 정보를 여기에 넣습니다.
+</details>
+
+<details>
+  <summary>이경민</summary>
+  설명이나 추가 정보를 여기에 넣습니다.
+</details>
+   
+<br>
