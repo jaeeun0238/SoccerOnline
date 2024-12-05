@@ -227,7 +227,7 @@ router.post('/game-start', async (req, res, next) => {
         }
       } else {
         resultMessage +=
-          '상대 공격수에게 막혔습니다. 상대 공격수가 드리블합니다.';
+          '\n상대 공격수에게 막혔습니다. 상대 공격수가 드리블합니다.';
         currentTurn++;
       }
     } else {
@@ -258,7 +258,7 @@ router.post('/game-start', async (req, res, next) => {
         }
       } else {
         resultMessage +=
-          '유저 공격수가 막았습니다. 유저 공격수가 드리블합니다.';
+          '\n유저 공격수가 막았습니다. 유저 공격수가 드리블합니다.';
         currentTurn++;
       }
     }
