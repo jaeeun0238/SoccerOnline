@@ -155,7 +155,71 @@ router.post('/game-start/:userPID', async (req, res, next) => {
 });
 */
 //test
-
+//게임 매칭 완성
+router.post('/game/match/', async (req, res, next) => {
+  const user1 = 15;
+  //기본 스코어 나중에 인증에서 받아올 예정
+  const default_user_score = 0;
+  try {
+    //스코어 계산
+    const max_score = default_user_score + 500;
+    const min_score = default_user_score - 500;
+    //스코어에 어울리는 사람 찾기
+    const user2 = await prisma.userData.findFirst({
+      where: {
+        NOT: {
+          userPID: user1,
+        },
+        gameSessionPID: null,
+        userScore: {
+          gte: min_score,
+          lte: max_score,
+        },
+      },
+      select: {
+        userPID: true,
+      },
+    });
+    console.log(user2);
+    //매칭 실패
+    if (!user2) {
+      throw { status: 404, message: ' 적합한 유저를 찾지 못했습니다. ' };
+    }
+    //성공시 트렌잭션으로 생성하고 플레이어 데이터에 pid 추가
+    const [game] = await prisma.$transaction(async (tx) => {
+      const game = await tx.gameSession.create({
+        data: {
+          userScore_1: 0,
+          userScore_2: 0,
+          sessionTurn: 0,
+        },
+      });
+      await tx.userData.update({
+        where: {
+          userPID: user1,
+        },
+        data: {
+          gameSessionPID: game.gameSessionPID,
+        },
+      });
+      await tx.userData.update({
+        where: {
+          userPID: user2.userPID,
+        },
+        data: {
+          gameSessionPID: game.gameSessionPID,
+        },
+      });
+      return [game];
+    });
+    if (!game) {
+      throw { status: 500, message: ' 매칭에 실패했습니다. ' };
+    }
+    res.status(200).json({ date: '적합한 상대와 매칭되었습니다.' });
+  } catch (err) {
+    next(err);
+  }
+});
 router.post('/game-start', async (req, res, next) => {
   try {
     const { gameSessionPID } = req.body;
