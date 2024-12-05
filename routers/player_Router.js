@@ -168,19 +168,19 @@ const upgradePlayer = async (req, res, next) => {
       },
     });
 
-    // 중복된 playerPID 중 하나만 선택
-    const uniqueMaterialCheck = [];
-    const seen = new Set();
+    // // 중복된 playerPID 중 하나만 선택
+    // const uniqueMaterialCheck = [];
+    // const seen = new Set();
 
-    materialCheck.forEach((item) => {
-      if (!seen.has(item.playerRostersPID)) {
-        uniqueMaterialCheck.push(item);
-        seen.add(item.playerRostersPID);
-      }
-    });
+    // materialCheck.forEach((item) => {
+    //   if (!seen.has(item.playerRostersPID)) {
+    //     uniqueMaterialCheck.push(item);
+    //     seen.add(item.playerRostersPID);
+    //   }
+    // });  >> PlayerID로 강화할 경우 필요
 
     // 강화 재료가 유저 보유 선수인지 확인
-    if (uniqueMaterialCheck.length !== materials.length) {
+    if (materialCheck.length !== materials.length) {
       return res.status(400).json({ message: '강화 재료로 사용할 선수는 보유 선수가 아닙니다.' });
     }
 
