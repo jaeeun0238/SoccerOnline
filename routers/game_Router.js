@@ -206,14 +206,18 @@ router.post('/game-start', async (req, res, next) => {
     const userPID_2 = user_data.userData[1];
     //const { gameSessionPID } = req.body;
 
-    const myStriker = {
-      playerName: 'testA',
-      playerAbilityATCK: 10,
-    };
-    const enemyStriker = {
-      playerName: 'testB',
-      playerAbilityATCK: 10,
-    };
+    const playerData = await prisma.playerRostersData.findUnique({
+      where: {
+        userPID: userPID_1,
+      },
+      include: {
+        playerSquadsData: {
+          include: {
+            playerEquipRostersData: true,
+          },
+        },
+      },
+    });
 
     const maxStrikerScore =
       myStriker.playerAbilityATCK + enemyStriker.playerAbilityATCK;
