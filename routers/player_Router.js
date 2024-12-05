@@ -168,9 +168,24 @@ const upgradePlayer = async (req, res, next) => {
         playerPID: { in: materials },
       },
     });
+    
+    // 중복된 playerPID 중 하나만 선택
+    const uniqueMaterialCheck = [];
+    const seen = new Set();
+
+    materialCheck.forEach((item) => {
+      if (!seen.has(item.playerPID)) {
+        uniqueMaterialCheck.push(item);
+        seen.add(item.playerPID);
+      }
+    });
+
+    // 디버깅용 로그 추가
+    console.log("Materials sent:", materials);
+    console.log("Materials found in roster:", materialCheck.map((item) => item.playerPID));
 
     // 강화 재료가 유저 보유 선수인지 확인
-    if (materialCheck.length !== materials.length) {
+    if (uniqueMaterialCheck.length !== materials.length) {
       return res.status(400).json({ message: '강화 재료로 사용할 선수는 보유 선수가 아닙니다.' });
     }
 
@@ -180,22 +195,116 @@ const upgradePlayer = async (req, res, next) => {
       return res.status(400).json({ message: '선수는 이미 최대 강화 단계에 도달했습니다.' });
     }
 
-    // 강화 재료 선수들 삭제
-    await prisma.playerRostersData.deleteMany({
-      where: {
-        userPID,
-        playerPID: { in: materials },
-      },
-    });
+    //강화 확률 설정
+    let maxSuccessRate = Math.min(materials.length * 20, 100);  
+    switch (existingPlayer.playerEnchant) {
+      case 0:  //existingPlayer.playerEnchant === 0 일때 실행
+        maxSuccessRate -= 0;
+        break;
+      case 1:
+        maxSuccessRate -= 0;
+        break;
+      case 2:
+        maxSuccessRate -= 19;
+        break;
+      case 3:
+        maxSuccessRate -= 36;
+        break;
+      case 4:
+        maxSuccessRate -= 50;
+        break;
+      case 5:
+        maxSuccessRate -= 74;
+        break;
+      case 6:
+        maxSuccessRate -= 85;
+        break;
+      case 7:
+        maxSuccessRate -= 93;
+        break;
+      case 8:
+        maxSuccessRate -= 95;
+        break;
+      case 9:
+        maxSuccessRate -= 96;
+        break;
+      //추후 업그레이드 시 단계 추가
+      default:
+        break;
+    }
+
+    //강화 성공 시 선수 어빌리티 증가량 설정
+    let upgradeAbility = 0
+    switch (existingPlayer.playerEnchant) {
+      case 0:
+        upgradeAbility += 1;
+        break;
+      case 1:
+        upgradeAbility += 1;
+        break;
+      case 2:
+        upgradeAbility += 1;
+        break;
+      case 3:
+        upgradeAbility += 2;
+        break;
+      case 4:
+        upgradeAbility += 2;
+        break;
+      case 5:
+        upgradeAbility += 3;
+        break;
+      case 6:
+        upgradeAbility += 3;
+        break;
+      case 7:
+        upgradeAbility += 4;
+        break;
+      case 8:
+        upgradeAbility += 5;
+        break;
+      case 9:
+        upgradeAbility += 5;
+        break;
+      default:
+        break;
+    }
+
+
+    const isSuccess = Math.random() * 100 <= maxSuccessRate
+
+    // 강화 실패 처리
+    if (!isSuccess) {
+      return res.status(200).json({ message: '강화에 실패하였습니다.' });
+    }
 
     // 선수 강화
     const updatedPlayer = await prisma.playerData.update({
       where: { playerPID: existingPlayer.playerPID }, // 기존 playerPID를 사용하여 업데이트
       data: {
-        playerAbilityATCK: playerStats.playerAbilityATCK + 5, // 능력치 강화
-        playerAbilityDEFEND: playerStats.playerAbilityDEFEND + 5,
-        playerAbilityMOBILITY: playerStats.playerAbilityMOBILITY + 5,
+        playerAbilityATCK: playerStats.playerAbilityATCK + upgradeAbility, // 능력치 강화
+        playerAbilityDEFEND: playerStats.playerAbilityDEFEND + upgradeAbility,
+        playerAbilityMOBILITY: playerStats.playerAbilityMOBILITY + upgradeAbility,
         playerEnchant: existingPlayer.playerEnchant + 1, // 강화 단계 증가
+      },
+    });
+
+    // playerRostersData 테이블에서도 playerEnchant 업데이트하도록 추가 > 별도의 테이블
+    await prisma.playerRostersData.updateMany({
+      where: {
+        userPID,
+        playerPID: existingPlayer.playerPID, // 해당 playerPID에 대해 업데이트
+      },
+      data: {
+        playerEnchant: existingPlayer.playerEnchant + 1, // playerRostersData의 강화 단계도 증가
+      },
+    });
+
+    // 강화 재료 선수들 삭제
+    await prisma.playerRostersData.deleteMany({
+      where: {
+        userPID,
+        playerPID: { in: materials },
       },
     });
 
