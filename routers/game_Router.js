@@ -269,7 +269,6 @@ router.post('/game-start', async (req, res, next) => {
       },
     });
 
-    // 최종 결과를 한 번만 응답
     res.status(200).json({ message: resultMessage });
   } catch (err) {
     next(err);
