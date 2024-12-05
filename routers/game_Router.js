@@ -189,12 +189,22 @@ router.post('/game/match', authMiddleware, async (req, res, next) => {
   }
 });
 
-
 router.post('/game-start/:userPID_1/:userPID_2', async (req, res, next) => {
   try {
-    const userPID_1 = req.params.userPID_1;
-    const userPID_2 = req.params.userPID_2;
-    const { gameSessionPID } = req.body;
+    const { gameSessionPID } = req.user.gameSessionPID;
+
+    const user_data = await prisma.gameSession.findUnique({
+      where: {
+        gameSessionPID: gameSessionPID,
+      },
+      include: {
+        userData: true,
+      },
+    });
+
+    const userPID_1 = user_data.userData[0];
+    const userPID_2 = user_data.userData[1];
+    //const { gameSessionPID } = req.body;
 
     const myStriker = {
       playerName: 'testA',
