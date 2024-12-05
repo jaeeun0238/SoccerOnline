@@ -119,6 +119,7 @@ router.post('/player/gacha', authenticateJWT, async (req, res) => {
 
 //선수 강화 API
 const upgradePlayer = async (req, res, next) => {
+  
   const maxUpgrade = 10; // 최대 강화 단계
 
   try {
@@ -283,15 +284,15 @@ const upgradePlayer = async (req, res, next) => {
     });
 
     // 선수 강화
-    const updatedPlayer = await prisma.playerData.update({
-      where: { playerPID: existingPlayer.playerPID }, // 기존 playerPID를 사용하여 업데이트
-      data: {
-        playerAbilityATCK: playerStats.playerAbilityATCK + upgradeAbility, // 능력치 강화
-        playerAbilityDEFEND: playerStats.playerAbilityDEFEND + upgradeAbility,
-        playerAbilityMOBILITY: playerStats.playerAbilityMOBILITY + upgradeAbility,
-        playerEnchant: existingPlayer.playerEnchant + 1, // 강화 단계 증가
-      },
-    });
+    // const updatedPlayer = await prisma.playerData.update({
+    //   where: { playerPID: existingPlayer.playerPID }, // 기존 playerPID를 사용하여 업데이트
+    //   data: {
+    //     playerAbilityATCK: playerStats.playerAbilityATCK + upgradeAbility, // 능력치 강화
+    //     playerAbilityDEFEND: playerStats.playerAbilityDEFEND + upgradeAbility,
+    //     playerAbilityMOBILITY: playerStats.playerAbilityMOBILITY + upgradeAbility,
+    //     playerEnchant: existingPlayer.playerEnchant + 1, // 강화 단계 증가
+    //   },
+    // }); >> 추후 RosterData에 능력치가 적용가능할 시 주석 해제
 
     // 강화 재료 선수들 삭제
     await prisma.playerRostersData.deleteMany({
@@ -303,7 +304,7 @@ const upgradePlayer = async (req, res, next) => {
 
     return res.status(200).json({
       message: `선수 강화가 완료되었습니다!`,
-      updatedPlayer,
+      //updatedPlayer,
       updatedRosterPlayer, // 변경된 playerRostersData 추가
     });
   } catch (err) {
