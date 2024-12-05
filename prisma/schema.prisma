@@ -14,11 +14,12 @@ model userData {
   userPassword   String @map("userPassword")
   userScore      Int    @map("userScore")
   userCash       Int    @map("userCash")
-  gameSessionPID Int    @default(0) @map("gameSessionPID")
+  gameSessionPID Int?   @map("gameSessionPID")
 
   playerRostersData playerRostersData[]
   playerSquadsData  playerSquadsData[]
-  gameSession       gameSession         @relation(fields: [gameSessionPID], references: [gameSessionPID])
+
+  gameSession gameSession? @relation(fields: [gameSessionPID], references: [gameSessionPID])
 
   @@map("userData")
 }
@@ -73,8 +74,8 @@ model playerData {
 
 model gameSession {
   gameSessionPID Int @id @default(autoincrement()) @map("gameSessionPID")
-  userScore_1    Int @map("userScore_1")
-  userScore_2    Int @map("userScore_2")
+  userScore_1    Int @default(0) @map("userScore_1")
+  userScore_2    Int @default(0) @map("userScore_2")
   sessionTurn    Int @map("turn")
 
   userData userData[]
