@@ -3,11 +3,10 @@ import express from 'express';
 import { prisma } from '../uts/prisma/index.js';
 
 const router = express.Router();
-
+/*
 //게임 생성  //parameter에 userPID 입력
 router.post('/game-start/:userPID', async (req, res, next) => {
   try {
-    const { gameSessionPID } = req.body;
     const mySquad = req.params.userPID;
     const enemySquad = req.body.playerSquadsPID;
 
@@ -121,38 +120,48 @@ router.post('/game-start/:userPID', async (req, res, next) => {
       },
     });
 
-    // const myStriker = {
-    //   playerName: 'testA',
-    //   playerAbilityATCK: 10,
-    // };
-    // const enemyStriker = {
-    //   playerName: 'testB',
-    //   playerAbilityATCK: 10,
-    // };
+    
+*/
+//test
 
-    // const myMidfielder = {
-    //   playerName: 'midA',
-    //   playerAbilityATCK: 7,
-    // };
-    // const myDefender = {
-    //   playerName: 'defA',
-    //   playerAbilityATCK: 4,
-    // };
-    // const enemyMidfielder = {
-    //   playerName: 'midB',
-    //   playerAbilityATCK: 6,
-    // };
-    // const enemyDefender = {
-    //   playerName: 'defB',
-    //   playerAbilityATCK: 5,
-    // };
+router.post('/game-start/:userPID_1/:userPID_2', async (req, res, next) => {
+  try {
+    const userPID_1 = req.params.userPID_1;
+    const userPID_2 = req.params.userPID_2;
+    const { gameSessionPID } = req.body;
+
+    const myStriker = {
+      playerName: 'testA',
+      playerAbilityATCK: 10,
+    };
+    const enemyStriker = {
+      playerName: 'testB',
+      playerAbilityATCK: 10,
+    };
+
+    const myMidfielder = {
+      playerName: 'midA',
+      playerAbilityATCK: 7,
+    };
+    const myDefender = {
+      playerName: 'defA',
+      playerAbilityATCK: 4,
+    };
+    const enemyMidfielder = {
+      playerName: 'midB',
+      playerAbilityATCK: 6,
+    };
+    const enemyDefender = {
+      playerName: 'defB',
+      playerAbilityATCK: 5,
+    };
 
     const maxStrikerScore =
       myStriker.playerAbilityATCK + enemyStriker.playerAbilityATCK;
     const maxMidfielderScore =
-      myStriker.playerAbilityATCK + enemyStriker.playerAbilityATCK;
+      myMidfielder.playerAbilityATCK + enemyMidfielder.playerAbilityATCK;
     const maxDefenderScore =
-      myStriker.playerAbilityATCK + enemyStriker.playerAbilityATCK;
+      myDefender.playerAbilityATCK + enemyDefender.playerAbilityATCK;
 
     const strikerValue = Math.random() * maxStrikerScore;
     const midfielderValue = Math.random() * maxMidfielderScore;
@@ -203,12 +212,12 @@ router.post('/game-start/:userPID', async (req, res, next) => {
         resultMessage += `\n유저의 ${myStriker.playerName} 선수가 상대 ${enemyStriker.playerName} 선수를 뚫고 지나갑니다. `;
 
         // 미드필더 시도
-        if (midfielderValue < myStriker.playerAbilityATCK) {
-          resultMessage += `\n유저의 ${myMidfielder.playerName} 선수가 상대 ${enemyStriker.playerName} 선수를 뚫고 지나갑니다. `;
+        if (midfielderValue < myMidfielder.playerAbilityATCK) {
+          resultMessage += `\n유저의 ${myMidfielder.playerName} 선수가 상대 ${enemyMidfielder.playerName} 선수를 뚫고 지나갑니다. `;
 
           // 수비수 시도
-          if (defenderValue < myStriker.playerAbilityATCK) {
-            resultMessage += `\n유저의 ${myStriker.playerName} 선수가 상대 ${enemyStriker.playerName} 선수를 뚫고 골을 넣었습니다!`;
+          if (defenderValue < myDefender.playerAbilityATCK) {
+            resultMessage += `\n유저의 ${myDefender.playerName} 선수가 상대 ${enemyDefender.playerName} 선수를 뚫고 골을 넣었습니다!`;
             currentUser_1Score++;
             resultMessage += `\n현재스코어 ${currentUser_1Score} : ${currentUser_2Score}`;
           } else {
