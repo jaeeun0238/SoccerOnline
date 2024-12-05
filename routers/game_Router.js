@@ -201,9 +201,10 @@ router.post('/game-start', async (req, res, next) => {
 
     if (currentTurn % 2 === 0) {
       //유저턴
+      resultMessage += `유저 공격수의 드리블`;
       // 공격수 시도
       if (strikerValue < myStriker.playerAbilityATCK) {
-        resultMessage += `유저의 ${myStriker.playerName} 선수가 상대 ${enemyStriker.playerName} 선수를 뚫고 지나갑니다. `;
+        resultMessage += `\n유저의 ${myStriker.playerName} 선수가 상대 ${enemyStriker.playerName} 선수를 뚫고 지나갑니다. `;
 
         // 미드필더 시도
         if (midfielderValue < myMidfielder.playerAbilityATCK) {
@@ -216,24 +217,25 @@ router.post('/game-start', async (req, res, next) => {
             resultMessage += `\n현재스코어 ${currentMyScore} : ${currentEnemyScore}`;
           } else {
             resultMessage +=
-              '\n상대 수비수에게 막혔습니다. 상대 공격수의 차례입니다.';
+              '\n상대 수비수에게 막혔습니다. 공이 상대 공격수에게 패스됩니다.';
             currentTurn++;
           }
         } else {
           resultMessage +=
-            '\n상대 미드필더에게 막혔습니다. 상대 공격수의 차례입니다.';
+            '\n상대 미드필더에게 막혔습니다. 공이 상대 공격수에게 패스됩니다.';
           currentTurn++;
         }
       } else {
         resultMessage +=
-          '상대 공격수에게 막혔습니다. 상대 공격수의 차례입니다.';
+          '상대 공격수에게 막혔습니다. 상대 공격수가 드리블합니다.';
         currentTurn++;
       }
     } else {
       //상대턴
+      resultMessage += `상대 공격수의 드리블`;
       // 공격수 시도
       if (strikerValue < enemyStriker.playerAbilityATCK) {
-        resultMessage += `상대의 ${enemyStriker.playerName} 선수가 유저의 ${myStriker.playerName} 선수를 뚫고 지나갑니다. `;
+        resultMessage += `\n상대의 ${enemyStriker.playerName} 선수가 유저의 ${myStriker.playerName} 선수를 뚫고 지나갑니다. `;
 
         // 미드필더 시도
         if (midfielderValue < enemyMidfielder.playerAbilityATCK) {
@@ -246,16 +248,17 @@ router.post('/game-start', async (req, res, next) => {
             resultMessage += `\n현재스코어 ${currentMyScore} : ${currentEnemyScore}`;
           } else {
             resultMessage +=
-              '\n유저 수비수가 막았습니다. 유저 공격수의 차례입니다.';
+              '\n유저 수비수가 막았습니다. 공을 유저 공격수에게 패스합니다.';
             currentTurn++;
           }
         } else {
           resultMessage +=
-            '\n유저 미드필더가 막았습니다. 유저 공격수의 차례입니다.';
+            '\n유저 미드필더가 막았습니다. 공을 유저 공격수에게 패스합니다.';
           currentTurn++;
         }
       } else {
-        resultMessage += '유저 공격수가 막았습니다. 유저 공격수의 차례입니다.';
+        resultMessage +=
+          '유저 공격수가 막았습니다. 유저 공격수가 드리블합니다.';
         currentTurn++;
       }
     }
