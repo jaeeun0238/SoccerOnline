@@ -189,7 +189,7 @@ router.post('/game/match', authMiddleware, async (req, res, next) => {
   }
 });
 
-router.post('/game-start/:userPID_1/:userPID_2', async (req, res, next) => {
+router.post('/game-start', async (req, res, next) => {
   try {
     const { gameSessionPID } = req.user.gameSessionPID;
 
