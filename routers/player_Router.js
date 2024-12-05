@@ -103,7 +103,7 @@ const performGacha = async (userID) => {
 
 // 선수 뽑기 API
 router.post('/player/gacha', authenticateJWT, async (req, res) => {
-  const { userID } = req.user.userPID;
+  const { userID } = req.user;
 
   const result = await performGacha(userID);
 
@@ -116,7 +116,6 @@ router.post('/player/gacha', authenticateJWT, async (req, res) => {
     player: result.player,
   });
 });
-
 
 //선수 강화 API
 const upgradePlayer = async (req, res, next) => {
