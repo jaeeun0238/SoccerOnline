@@ -123,7 +123,7 @@ const upgradePlayer = async (req, res, next) => {
 
   try {
     const { userPID } = req.user; // 인증된 유저 정보 가져오기
-    const { playerPID, materials } = req.body; // 요청 바디에서 playerPID와 materials 가져오기
+    const { playerRostersPID, materials } = req.body; // 요청 바디에서 playerRostersPID와 materials 가져오기
 
     // 유저 정보 조회
     const user = await prisma.userData.findUnique({
@@ -134,11 +134,10 @@ const upgradePlayer = async (req, res, next) => {
       throw new Error('User not found');
     }
 
-    // 보유 선수 확인 > playerPID로 조회
-    const existingPlayer = await prisma.playerRostersData.findFirst({
+    // playerRostersPID를 통해 특정 선수 찾기
+    const existingPlayer = await prisma.playerRostersData.findUnique({
       where: {
-        userPID,
-        playerPID, // playerPID로 확인 (playerID가 아니라 playerPID)
+        playerRostersPID, // playerRostersPID로 확인
       },
     });
 
@@ -165,24 +164,20 @@ const upgradePlayer = async (req, res, next) => {
     const materialCheck = await prisma.playerRostersData.findMany({
       where: {
         userPID,
-        playerPID: { in: materials },
+        playerRostersPID: { in: materials },
       },
     });
-    
+
     // 중복된 playerPID 중 하나만 선택
     const uniqueMaterialCheck = [];
     const seen = new Set();
 
     materialCheck.forEach((item) => {
-      if (!seen.has(item.playerPID)) {
+      if (!seen.has(item.playerRostersPID)) {
         uniqueMaterialCheck.push(item);
-        seen.add(item.playerPID);
+        seen.add(item.playerRostersPID);
       }
     });
-
-    // 디버깅용 로그 추가
-    console.log("Materials sent:", materials);
-    console.log("Materials found in roster:", materialCheck.map((item) => item.playerPID));
 
     // 강화 재료가 유저 보유 선수인지 확인
     if (uniqueMaterialCheck.length !== materials.length) {
@@ -196,9 +191,9 @@ const upgradePlayer = async (req, res, next) => {
     }
 
     //강화 확률 설정
-    let maxSuccessRate = Math.min(materials.length * 20, 100);  
+    let maxSuccessRate = Math.min(materials.length * 20, 100); //materials가 100을 넘길 수 있으므로 최대 100으로 설정
     switch (existingPlayer.playerEnchant) {
-      case 0:  //existingPlayer.playerEnchant === 0 일때 실행
+      case 0:
         maxSuccessRate -= 0;
         break;
       case 1:
@@ -270,13 +265,22 @@ const upgradePlayer = async (req, res, next) => {
         break;
     }
 
-
     const isSuccess = Math.random() * 100 <= maxSuccessRate
 
     // 강화 실패 처리
     if (!isSuccess) {
       return res.status(200).json({ message: '강화에 실패하였습니다.' });
     }
+
+    // playerRostersData에서 해당 playerRostersPID만 업데이트
+    const updatedRosterPlayer = await prisma.playerRostersData.update({
+      where: {
+        playerRostersPID, // playerRostersPID로 해당 선수만 업데이트
+      },
+      data: {
+        playerEnchant: existingPlayer.playerEnchant + 1, // 강화 단계 증가
+      },
+    });
 
     // 선수 강화
     const updatedPlayer = await prisma.playerData.update({
@@ -289,28 +293,18 @@ const upgradePlayer = async (req, res, next) => {
       },
     });
 
-    // playerRostersData 테이블에서도 playerEnchant 업데이트하도록 추가 > 별도의 테이블
-    await prisma.playerRostersData.updateMany({
-      where: {
-        userPID,
-        playerPID: existingPlayer.playerPID, // 해당 playerPID에 대해 업데이트
-      },
-      data: {
-        playerEnchant: existingPlayer.playerEnchant + 1, // playerRostersData의 강화 단계도 증가
-      },
-    });
-
     // 강화 재료 선수들 삭제
     await prisma.playerRostersData.deleteMany({
       where: {
         userPID,
-        playerPID: { in: materials },
+        playerRostersPID: { in: materials },
       },
     });
 
     return res.status(200).json({
       message: `선수 강화가 완료되었습니다!`,
       updatedPlayer,
+      updatedRosterPlayer, // 변경된 playerRostersData 추가
     });
   } catch (err) {
     next(err);
