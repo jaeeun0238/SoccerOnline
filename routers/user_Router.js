@@ -42,6 +42,11 @@ router.post('/sign-up', async (req, res, next) => {
         },
       });
       //스쿼드 만들기
+      const squard = await tx.playerSquadsData.create({
+        data: {
+          userPID: user.userPID,
+        },
+      });
 
       for (let i = 0; i < players.length; i++) {
         const player = players[i];
@@ -52,8 +57,15 @@ router.post('/sign-up', async (req, res, next) => {
             playerEnchant: 0,
           },
         });
-
         //playerPID를 이용해서 장착되게
+        const equipRoster = await tx.playerEquipRostersData.create({
+          data: {
+            playerSquadsPID: squard.playerSquadsPID,
+            playerRostersPID: defaultPlayer.playerRostersPID,
+            position: i,
+          },
+        });
+        console.log(equipRoster);
       }
 
       // 에러가 발생하여, 트랜잭션 내에서 실행된 모든 쿼리가 롤백됩니다.
