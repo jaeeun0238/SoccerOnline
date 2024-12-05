@@ -26,17 +26,40 @@ router.post('/sign-up', async (req, res, next) => {
 
     // 비밀번호 해시화 (변경된 부분)
     const bcryptPassword = await bcrypt.hash(userPassword, 10); // salt rounds 추가
-
-    // userData 테이블에 사용자를 추가
-    const user = await prisma.userData.create({
-      data: {
-        userID,
-        userName,
-        userPassword: bcryptPassword,
-        userScore: 0,
-        userCash: 5000,
-      },
+    const players = await prisma.playerData.findMany({
+      take: 3,
     });
+
+    const result = await prisma.$transaction(async (tx) => {
+      // 트랜잭션 내에서 사용자를 생성합니다.
+      const user = await tx.userData.create({
+        data: {
+          userID,
+          userName,
+          userPassword: bcryptPassword,
+          userScore: 0,
+          userCash: 5000,
+        },
+      });
+      //스쿼드 만들기
+
+      for (let i = 0; i < players.length; i++) {
+        const player = players[i];
+        const defaultPlayer = await tx.playerRostersData.create({
+          data: {
+            userPID: user.userPID,
+            playerPID: player.playerPID,
+            playerEnchant: 0,
+          },
+        });
+
+        //playerPID를 이용해서 장착되게
+      }
+
+      // 에러가 발생하여, 트랜잭션 내에서 실행된 모든 쿼리가 롤백됩니다.
+      return user;
+    });
+    // userData 테이블에 사용자를 추가
 
     return res.status(201).json({ message: '회원가입이 완료되었습니다.' });
   } catch (err) {
