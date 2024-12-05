@@ -4,11 +4,10 @@ import { prisma } from '../uts/prisma/index.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
-
+/*
 //게임 생성  //parameter에 userPID 입력
 router.post('/game-start/:userPID', async (req, res, next) => {
   try {
-    const { gameSessionPID } = req.body;
     const mySquad = req.params.userPID;
     const enemySquad = req.body.playerSquadsPID;
 
@@ -123,39 +122,6 @@ router.post('/game-start/:userPID', async (req, res, next) => {
     });
 
 
-    //수정필요
-    const mySquadScore = myStrikerPlayerData.playerAbilityATCK;
-    const enemySquadScore = enemyStrikerPlayerData.playerAbilityATCK;
-
-    const maxScore = mySquadScore + enemySquadScore;
-
-    const randomValue = Math.random() * maxScore;
-
-    let myScore, enemyScore, result;
-
-    if (randomValue < mySquadScore) {
-      // 유저 승리 처리
-      myScore = Math.floor(Math.random() * 4) + 2; // 2에서 5 사이
-      enemyScore = Math.floor(Math.random() * Math.min(3, myScore)); // myScore보다 작은 값을 설정
-      result = `승리: 유저 ${myScore} - ${enemyScore} 상대`;
-    } else {
-      // 상대 유저 승리 처리
-      enemyScore = Math.floor(Math.random() * 4) + 2; // 2에서 5 사이
-      myScore = Math.floor(Math.random() * Math.min(3, enemyScore)); // enemyScore보다 작은 값을 설정
-      result = `패배: 상대 ${enemyScore} - ${myScore} 유저`;
-    }
-
-    //게임 전적
-    // await prisma.game_Records.create({
-    //   data: {
-    //     gameRecord: result,
-    //   },
-    // });
-    return res.status(200).json({ data: result });
-  } catch (err) {
-    next(err);
-  }
-});
 */
 //test
 
@@ -223,8 +189,11 @@ router.post('/game/match', authMiddleware, async (req, res, next) => {
   }
 });
 
-router.post('/game-start', async (req, res, next) => {
+
+router.post('/game-start/:userPID_1/:userPID_2', async (req, res, next) => {
   try {
+    const userPID_1 = req.params.userPID_1;
+    const userPID_2 = req.params.userPID_2;
     const { gameSessionPID } = req.body;
 
     const myStriker = {
@@ -236,42 +205,12 @@ router.post('/game-start', async (req, res, next) => {
       playerAbilityATCK: 10,
     };
 
-    const myMidfielder = { playerName: 'midA', playerAbilityATCK: 7 }; // 미드필더 예시
-    const myDefender = { playerName: 'defA', playerAbilityATCK: 4 }; // 수비수 예시
-    const enemyMidfielder = { playerName: 'midB', playerAbilityATCK: 6 }; // 적 미드필더 예시
-    const enemyDefender = { playerName: 'defB', playerAbilityATCK: 5 }; // 적 수비수 예시
-    // const myStriker = {
-    //   playerName: 'testA',
-    //   playerAbilityATCK: 10,
-    // };
-    // const enemyStriker = {
-    //   playerName: 'testB',
-    //   playerAbilityATCK: 10,
-    // };
-
-    // const myMidfielder = {
-    //   playerName: 'midA',
-    //   playerAbilityATCK: 7,
-    // };
-    // const myDefender = {
-    //   playerName: 'defA',
-    //   playerAbilityATCK: 4,
-    // };
-    // const enemyMidfielder = {
-    //   playerName: 'midB',
-    //   playerAbilityATCK: 6,
-    // };
-    // const enemyDefender = {
-    //   playerName: 'defB',
-    //   playerAbilityATCK: 5,
-    // };
-
     const maxStrikerScore =
       myStriker.playerAbilityATCK + enemyStriker.playerAbilityATCK;
     const maxMidfielderScore =
-      myStriker.playerAbilityATCK + enemyStriker.playerAbilityATCK;
+      myMidfielder.playerAbilityATCK + enemyMidfielder.playerAbilityATCK;
     const maxDefenderScore =
-      myStriker.playerAbilityATCK + enemyStriker.playerAbilityATCK;
+      myDefender.playerAbilityATCK + enemyDefender.playerAbilityATCK;
 
     const strikerValue = Math.random() * maxStrikerScore;
     const midfielderValue = Math.random() * maxMidfielderScore;
@@ -322,12 +261,12 @@ router.post('/game-start', async (req, res, next) => {
         resultMessage += `\n유저의 ${myStriker.playerName} 선수가 상대 ${enemyStriker.playerName} 선수를 뚫고 지나갑니다. `;
 
         // 미드필더 시도
-        if (midfielderValue < myStriker.playerAbilityATCK) {
-          resultMessage += `\n유저의 ${myMidfielder.playerName} 선수가 상대 ${enemyStriker.playerName} 선수를 뚫고 지나갑니다. `;
+        if (midfielderValue < myMidfielder.playerAbilityATCK) {
+          resultMessage += `\n유저의 ${myMidfielder.playerName} 선수가 상대 ${enemyMidfielder.playerName} 선수를 뚫고 지나갑니다. `;
 
           // 수비수 시도
-          if (defenderValue < myStriker.playerAbilityATCK) {
-            resultMessage += `\n유저의 ${myStriker.playerName} 선수가 상대 ${enemyStriker.playerName} 선수를 뚫고 골을 넣었습니다!`;
+          if (defenderValue < myDefender.playerAbilityATCK) {
+            resultMessage += `\n유저의 ${myDefender.playerName} 선수가 상대 ${enemyDefender.playerName} 선수를 뚫고 골을 넣었습니다!`;
             currentUser_1Score++;
             resultMessage += `\n현재스코어 ${currentUser_1Score} : ${currentUser_2Score}`;
           } else {
@@ -422,28 +361,28 @@ router.delete('/game-end/:gameSessionPID', async (req, res, next) => {
   }
 });
 
-router.post('/user', async (req, res, next) => {
-  const userData = req.body;
-  const user = await prisma.userData.create({
-    data: {
-      userID: userData.userID,
-      userName: userData.userName,
-      userPassword: userData.userPassword,
-      userScore: 1000,
-      userCash: 1000,
-    },
-  });
-  res.status(200).json({ data: user });
-});
+// router.post('/user', async (req, res, next) => {
+//   const userData = req.body;
+//   const user = await prisma.userData.create({
+//     data: {
+//       userID: userData.userID,
+//       userName: userData.userName,
+//       userPassword: userData.userPassword,
+//       userScore: 1000,
+//       userCash: 1000,
+//     },
+//   });
+//   res.status(200).json({ data: user });
+// });
 
-router.post('/squad', async (req, res, next) => {
-  const userData = req.body;
-  const squad = await prisma.playerSquadsData.create({
-    data: {
-      userPID: +userData.userPID,
-    },
-  });
-  res.status(200).json({ data: squad });
-});
+// router.post('/squad', async (req, res, next) => {
+//   const userData = req.body;
+//   const squad = await prisma.playerSquadsData.create({
+//     data: {
+//       userPID: +userData.userPID,
+//     },
+//   });
+//   res.status(200).json({ data: squad });
+// });
 
 export default router;
