@@ -312,28 +312,28 @@ router.delete('/game-end/:gameSessionPID', async (req, res, next) => {
   }
 });
 
-router.post('/user', async (req, res, next) => {
-  const userData = req.body;
-  const user = await prisma.userData.create({
-    data: {
-      userID: userData.userID,
-      userName: userData.userName,
-      userPassword: userData.userPassword,
-      userScore: 1000,
-      userCash: 1000,
-    },
-  });
-  res.status(200).json({ data: user });
-});
+// router.post('/user', async (req, res, next) => {
+//   const userData = req.body;
+//   const user = await prisma.userData.create({
+//     data: {
+//       userID: userData.userID,
+//       userName: userData.userName,
+//       userPassword: userData.userPassword,
+//       userScore: 1000,
+//       userCash: 1000,
+//     },
+//   });
+//   res.status(200).json({ data: user });
+// });
 
-router.post('/squad', async (req, res, next) => {
-  const userData = req.body;
-  const squad = await prisma.playerSquadsData.create({
-    data: {
-      userPID: +userData.userPID,
-    },
-  });
-  res.status(200).json({ data: squad });
-});
+// router.post('/squad', async (req, res, next) => {
+//   const userData = req.body;
+//   const squad = await prisma.playerSquadsData.create({
+//     data: {
+//       userPID: +userData.userPID,
+//     },
+//   });
+//   res.status(200).json({ data: squad });
+// });
 
 export default router;
