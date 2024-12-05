@@ -1,6 +1,7 @@
 /* 기본 게임 기능 */
 import express from 'express';
 import { prisma } from '../uts/prisma/index.js';
+import authMiddleware from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 /*
@@ -120,9 +121,74 @@ router.post('/game-start/:userPID', async (req, res, next) => {
       },
     });
 
-    
+
 */
 //test
+
+//게임 매칭 완성
+router.post('/game/match', authMiddleware, async (req, res, next) => {
+  const user_1 = req.user.userPID;
+  const user_1_score = req.user.userScore;
+  try {
+    //스코어 계산
+    const max_score = user_1_score + 500;
+    const min_score = user_1_score - 500;
+    //스코어에 어울리는 사람 찾기
+    const user_2 = await prisma.userData.findFirst({
+      where: {
+        NOT: {
+          userPID: user_1,
+        },
+        gameSessionPID: null,
+        userScore: {
+          gte: min_score,
+          lte: max_score,
+        },
+      },
+      select: {
+        userPID: true,
+      },
+    });
+    //매칭 실패
+    if (!user_2) {
+      throw { status: 404, message: ' 적합한 유저를 찾지 못했습니다. ' };
+    }
+    //성공시 트렌잭션으로 생성하고 플레이어 데이터에 pid 추가
+    const [game] = await prisma.$transaction(async (tx) => {
+      const game = await tx.gameSession.create({
+        data: {
+          userScore_1: 0,
+          userScore_2: 0,
+          sessionTurn: 0,
+        },
+      });
+      await tx.userData.update({
+        where: {
+          userPID: user_1,
+        },
+        data: {
+          gameSessionPID: game.gameSessionPID,
+        },
+      });
+      await tx.userData.update({
+        where: {
+          userPID: user_2.userPID,
+        },
+        data: {
+          gameSessionPID: game.gameSessionPID,
+        },
+      });
+      return [game];
+    });
+    if (!game) {
+      throw { status: 500, message: ' 매칭에 실패했습니다. ' };
+    }
+    res.status(200).json({ date: '적합한 상대와 매칭되었습니다.' });
+  } catch (err) {
+    next(err);
+  }
+});
+
 
 router.post('/game-start/:userPID_1/:userPID_2', async (req, res, next) => {
   try {
@@ -137,23 +203,6 @@ router.post('/game-start/:userPID_1/:userPID_2', async (req, res, next) => {
     const enemyStriker = {
       playerName: 'testB',
       playerAbilityATCK: 10,
-    };
-
-    const myMidfielder = {
-      playerName: 'midA',
-      playerAbilityATCK: 7,
-    };
-    const myDefender = {
-      playerName: 'defA',
-      playerAbilityATCK: 4,
-    };
-    const enemyMidfielder = {
-      playerName: 'midB',
-      playerAbilityATCK: 6,
-    };
-    const enemyDefender = {
-      playerName: 'defB',
-      playerAbilityATCK: 5,
     };
 
     const maxStrikerScore =
