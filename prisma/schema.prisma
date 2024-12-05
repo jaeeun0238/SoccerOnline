@@ -8,15 +8,17 @@ datasource db {
 }
 
 model userData {
-  userPID      Int    @id @default(autoincrement()) @map("userPID")
-  userID       String @unique @map("userID")
-  userName     String @unique @map("userName")
-  userPassword String @map("userPassword")
-  userScore    Int    @map("userScore")
-  userCash     Int    @map("userCash")
+  userPID        Int    @id @default(autoincrement()) @map("userPID")
+  userID         String @unique @map("userID")
+  userName       String @unique @map("userName")
+  userPassword   String @map("userPassword")
+  userScore      Int    @map("userScore")
+  userCash       Int    @map("userCash")
+  gameSessionPID Int    @default(0) @map("gameSessionPID")
 
   playerRostersData playerRostersData[]
   playerSquadsData  playerSquadsData[]
+  gameSession       gameSession         @relation(fields: [gameSessionPID], references: [gameSessionPID])
 
   @@map("userData")
 }
@@ -71,9 +73,21 @@ model playerData {
 
 model gameSession {
   gameSessionPID Int @id @default(autoincrement()) @map("gameSessionPID")
-  myScore        Int @map("myScore")
-  enemyScore     Int @map("enemyScore")
-  turn           Int @map("turn")
+  userScore_1    Int @map("userScore_1")
+  userScore_2    Int @map("userScore_2")
+  sessionTurn    Int @map("turn")
+
+  userData userData[]
 
   @@map("gameSession")
+}
+
+model gameSessionHestory {
+  gameSessionHestoryPID Int @id @default(autoincrement()) @map("gameSessionHestoryPID")
+  userPID_1             Int @map("userPID_1")
+  userPID_2             Int @map("userPID_2")
+  userScore_1           Int @map("userScore_1")
+  userScore_2           Int @map("userScore_2")
+
+  @@map("gameSessionHestory")
 }
