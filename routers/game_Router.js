@@ -109,7 +109,7 @@ router.post('/game-start', async (req, res, next) => {
     });
 
     /*const
-    user1Striker;
+    
     user1Midfielder;
     user1Defender;
     user2Striker;
@@ -236,15 +236,15 @@ router.post('/game-start', async (req, res, next) => {
       resultMessage += `유저2 공격수의 드리블`;
       // 공격수 시도
       if (user2RS < user2STR) {
-        resultMessage += `\n유저2의 ${enemyStriker.playerName} 선수가 상대 ${myStriker.playerName} 선수를 뚫고 지나갑니다. `;
+        resultMessage += `\n유저2의 ${user2Striker.playerName} 선수가 상대 ${user1Striker.playerName} 선수를 뚫고 지나갑니다. `;
 
         // 미드필더 시도
         if (user2RM < user2STR) {
-          resultMessage += `\n유저2의 ${enemyMidfielder.playerName} 선수가 상대 ${myMidfielder.playerName} 선수를 뚫고 지나갑니다. `;
+          resultMessage += `\n유저2의 ${user2Striker.playerName} 선수가 상대 ${user1Midfielder.playerName} 선수를 뚫고 지나갑니다. `;
 
           // 수비수 시도
           if (user2RD < user2STR) {
-            resultMessage += `\n유저2의 ${enemyDefender.playerName} 선수가 상대 ${myDefender.playerName} 선수를 뚫고 골을 넣었습니다!`;
+            resultMessage += `\n유저2의 ${user2Striker.playerName} 선수가 상대 ${user1Defender.playerName} 선수를 뚫고 골을 넣었습니다!`;
             currentUser_2Score++;
             resultMessage += `\n현재스코어 ${currentUser_1Score} : ${currentUser_2Score}`;
           } else {
@@ -279,7 +279,7 @@ router.post('/game-start', async (req, res, next) => {
   }
 });
 
-//게임세션 제거
+//게임종료
 router.delete('/game-end/:gameSessionPID', async (req, res, next) => {
   const gameSessionPID = req.params.gameSessionPID;
   try {
@@ -296,8 +296,8 @@ router.delete('/game-end/:gameSessionPID', async (req, res, next) => {
       };
     }
 
-    /*승패 기록 필요*/
-    await prisma.gameSessionHestory.create({
+    /*승패 기록?*/
+    await prisma.gameSessionHistory.create({
       data: {
         userPID_1: gameSession.userPID_1,
         userPID_2: gameSession.userPID_2,
