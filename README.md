@@ -16,20 +16,7 @@
 
 |          유재은         |          조상우         |          김지웅         |          박성욱         |          정찬식         |          이경민         |
 | :--------------------------: | :--------------------------: | :--------------------------: | :--------------------------: | :--------------------------: | :--------------------------: |
-|<image width="150px" src="https://github.com/user-attachments/assets/4c400d74-2802-4bfe-acf1-9ca16c2b3073">|<image width="150px" src="https://github.com/user-attachments/assets/3b1aab86-19e0-4543-a753-dea39b233ca6">|<image width="150px" src="https://github.com/user-attachments/assets/03a10004-f07b-46b0-b5f1-cddd0146d5c0"> |<image width="150px" src="https://user-images.githubusercontent.com/119159558/227076242-6e802ef4-4f4e-48f0-8a8a-aa5f4ebdb8b8.png"/> | <image width="150px" src="https://github.com/user-attachments/assets/46941cb0-d79a-4dae-88d8-0958dc6c0d63"> | <image width="150px" src="https://github.com/user-attachments/assets/da18ef02-1327-46a1-bc64-66690778bcdd">|
-| [@Jaeeun0238](https://github.com/jaeeun0238) | [@bakfox](https://github.com/bakfox)| [@zera1004](https://github.com/zera1004)| [@WooK1184](https://github.com/WooK1184) | [chansikjeong](https://github.com/chansikjeong) | [@lgm-7](https://github.com/lgm-7) |
-
-
-
-
-
-
-<br/>
-
-# 📕 시작 가이드
-###
-<h3>Requirements</h3>
-For building and running the application you nee은</summary>
+|<image width="150px" src="https://github.com/user-attachments/assets/4c400d74-2802-4bfe-acf1-9ca16c2b3073">|<image width="150px" src="https://github.com/user-attachments/assets/3b1aab86-19e0-4543-a753-dea39b233ca6">|<image width="150px" src="https://github.com/user-attachments/assets/03a10004-f07b-46b0-b5f1-cddd0146d5c0"> |<image width="150px" src="https://user-images.githubusercontent.com/119159558/227076242-6e802ef4-4f4e-48f0-8a8a-aa5f4ebdb8b8.png"/> 은</summary>
  <br>
   <ul>
     <li>회원관련 생성 및 등록 API</li>
@@ -234,7 +221,6 @@ https://teamsparta.notion.site/13f2dc3ef51481428498f6823ea158a2?v=13f2dc3ef51481
     </li>
   </ul>
 </details>
-
 
 
 
