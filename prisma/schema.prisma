@@ -84,7 +84,7 @@ model gameSession {
 }
 
 model gameSessionHistory {
-  gameSessionHestoryPID Int @id @default(autoincrement()) @map("gameSessionHistoryPID")
+  gameSessionHistoryPID Int @id @default(autoincrement()) @map("gameSessionHistoryPID")
   userPID_1             Int @map("userPID_1")
   userPID_2             Int @map("userPID_2")
   userScore_1           Int @map("userScore_1")
