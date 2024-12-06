@@ -274,39 +274,43 @@ const upgradePlayer = async (req, res, next) => {
     }
 
     // playerRostersData에서 해당 playerRostersPID만 업데이트
-    const updatedRosterPlayer = await prisma.playerRostersData.update({
-      where: {
-        playerRostersPID, // playerRostersPID로 해당 선수만 업데이트
-      },
-      data: {
-        playerEnchant: existingPlayer.playerEnchant + 1, // 강화 단계 증가
-      },
+    const result = await prisma.$transaction(async (prisma) => {
+      const updatedRosterPlayer = await prisma.playerRostersData.update({
+        where: {
+          playerRostersPID, // playerRostersPID로 해당 선수만 업데이트
+        },
+        data: {
+          playerEnchant: existingPlayer.playerEnchant + 1, // 강화 단계 증가
+        },
+      });
+
+      // 선수 강화
+      // const updatedPlayer = await prisma.playerData.update({
+      //   where: { playerPID: existingPlayer.playerPID }, // 기존 playerPID를 사용하여 업데이트
+      //   data: {
+      //     playerAbilityATCK: playerStats.playerAbilityATCK + upgradeAbility, // 능력치 강화
+      //     playerAbilityDEFEND: playerStats.playerAbilityDEFEND + upgradeAbility,
+      //     playerAbilityMOBILITY: playerStats.playerAbilityMOBILITY + upgradeAbility,
+      //     playerEnchant: existingPlayer.playerEnchant + 1, // 강화 단계 증가
+      //   },
+      // }); >> 추후 RosterData에 능력치가 적용가능할 시 주석 해제
+
+      // 강화 재료 선수들 삭제
+      await prisma.playerRostersData.deleteMany({
+        where: {
+          userPID,
+          playerRostersPID: { in: materials },
+        },
+      });
+      // 트랜잭션 내에서 변경된 데이터를 반환
+      return updatedRosterPlayer;  // 트랜잭션이 끝날 때 반환
     });
 
-    // 선수 강화
-    // const updatedPlayer = await prisma.playerData.update({
-    //   where: { playerPID: existingPlayer.playerPID }, // 기존 playerPID를 사용하여 업데이트
-    //   data: {
-    //     playerAbilityATCK: playerStats.playerAbilityATCK + upgradeAbility, // 능력치 강화
-    //     playerAbilityDEFEND: playerStats.playerAbilityDEFEND + upgradeAbility,
-    //     playerAbilityMOBILITY: playerStats.playerAbilityMOBILITY + upgradeAbility,
-    //     playerEnchant: existingPlayer.playerEnchant + 1, // 강화 단계 증가
-    //   },
-    // }); >> 추후 RosterData에 능력치가 적용가능할 시 주석 해제
-
-    // 강화 재료 선수들 삭제
-    await prisma.playerRostersData.deleteMany({
-      where: {
-        userPID,
-        playerRostersPID: { in: materials },
-      },
-    });
-
-    return res.status(200).json({
-      message: `선수 강화가 완료되었습니다!`,
-      //updatedPlayer,
-      updatedRosterPlayer, // 변경된 playerRostersData 추가
-    });
+      return res.status(200).json({
+        message: `선수 강화가 완료되었습니다!`,
+        //updatedPlayer,
+        updatedRosterPlayer: result //단일 객체로 바로 접근
+      });
   } catch (err) {
     next(err);
   }
