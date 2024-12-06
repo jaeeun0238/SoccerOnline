@@ -26,9 +26,6 @@ router.post('/game/match', authMiddleware, async (req, res, next) => {
         },
       },
       take: 10,
-      select: {
-        userPID: true,
-      },
       include: {
         playerSquadsData: {
           include: {
@@ -37,12 +34,16 @@ router.post('/game/match', authMiddleware, async (req, res, next) => {
         },
       },
     });
-    const user_2 = user_temp.forEach((user_data) => {
+    console.log(user_temp[0].playerSquadsData);
+
+    let user_2;
+    user_temp.forEach((user_data) => {
       if (user_data.playerSquadsData[0].playerEquipRostersData.length >= 3) {
-        return user_data;
+        return (user_2 = user_data);
       }
     });
     //매칭 실패
+    console.log(user_2);
     if (!user_2) {
       throw { status: 404, message: ' 적합한 유저를 찾지 못했습니다. ' };
     }
@@ -84,7 +85,7 @@ router.post('/game/match', authMiddleware, async (req, res, next) => {
 
 router.post('/game-start', authMiddleware, async (req, res, next) => {
   try {
-    const { gameSessionPID } = req.user.gameSessionPID;
+    const { gameSessionPID } = req.user;
 
     const user_data = await prisma.gameSession.findUnique({
       where: {
@@ -121,7 +122,7 @@ router.post('/game-start', authMiddleware, async (req, res, next) => {
         },
       });
       // 그 받아온 선수의 데이터를 선수데이터 db를 불러와서 선수의 실질적인 데이터 받아오기.
-      const player = await prisma.playerData.findUnique({
+      const player = await prisma.playerData.findFirst({
         where: { playerPID: isPlayer_temp.playerPID },
       });
       //여기서 플레이어 선수 푸쉬 해주기
@@ -148,7 +149,7 @@ router.post('/game-start', authMiddleware, async (req, res, next) => {
               .playerRostersPID,
         },
       });
-      const player = await prisma.playerData.findUnique({
+      const player = await prisma.playerData.findFirst({
         where: { playerPID: isPlayer_temp.playerPID },
       });
       user_2_player.push({
@@ -159,61 +160,61 @@ router.post('/game-start', authMiddleware, async (req, res, next) => {
       });
     }
 
-    const user1Striker = user_1_player[0];
-    const user1Midfielder = user_1_player[1];
-    const user1Defender = user_1_player[2];
-    const user2Striker = user_2_player[0];
-    const user2Midfielder = user_2_player[1];
-    const user2Defender = user_2_player[2];
+    let user1Striker = user_1_player[0];
+    let user1Midfielder = user_1_player[1];
+    let user1Defender = user_1_player[2];
+    let user2Striker = user_2_player[0];
+    let user2Midfielder = user_2_player[1];
+    let user2Defender = user_2_player[2];
 
     //스탯 정규화
     //유저1
-    const user1STR =
-      user1Striker.playerAbilityATCK * 1.1 +
-      user1Striker.playerAbilityDEFEND * 0.8 +
-      user1Striker.playerAbilityMOBILITY * 0.7;
-    const user1MID =
-      user1Midfielder.playerAbilityATCK +
-      user1Midfielder.playerAbilityDEFEND * 0.8 +
-      user1Midfielder.playerAbilityMOBILITY;
-    const user1DEF =
-      user1Defender.playerAbilityATCK * 0.8 +
-      user1Defender.playerAbilityDEFEND * 1.2 +
-      user1Defender.playerAbilityMOBILITY * 0.7;
 
+    let user1STR =
+      user1Striker.player.playerAbilityATCK * 1.1 +
+      user1Striker.player.playerAbilityDEFEND * 0.8 +
+      user1Striker.player.playerAbilityMOBILITY * 0.7;
+    let user1MID =
+      user1Midfielder.player.playerAbilityATCK +
+      user1Midfielder.player.playerAbilityDEFEND * 0.8 +
+      user1Midfielder.player.playerAbilityMOBILITY;
+    let user1DEF =
+      user1Defender.player.playerAbilityATCK * 0.8 +
+      user1Defender.player.playerAbilityDEFEND * 1.2 +
+      user1Defender.player.playerAbilityMOBILITY * 0.7;
     //유저2
-    const user2STR =
-      user2Striker.playerAbilityATCK * 1.1 +
-      user2Striker.playerAbilityDEFEND * 0.8 +
-      user2Striker.playerAbilityMOBILITY * 0.7;
-    const user2MID =
-      user2Midfielder.playerAbilityATCK +
-      user2Midfielder.playerAbilityDEFEND * 0.8 +
-      user2Midfielder.playerAbilityMOBILITY;
-    const user2DEF =
-      user2Defender.playerAbilityATCK * 0.8 +
-      user2Defender.playerAbilityDEFEND * 1.2 +
-      user2Defender.playerAbilityMOBILITY * 0.7;
+    let user2STR =
+      user2Striker.player.playerAbilityATCK * 1.1 +
+      user2Striker.player.playerAbilityDEFEND * 0.8 +
+      user2Striker.player.playerAbilityMOBILITY * 0.7;
+    let user2MID =
+      user2Midfielder.player.playerAbilityATCK +
+      user2Midfielder.player.playerAbilityDEFEND * 0.8 +
+      user2Midfielder.player.playerAbilityMOBILITY;
+    let user2DEF =
+      user2Defender.player.playerAbilityATCK * 0.8 +
+      user2Defender.player.playerAbilityDEFEND * 1.2 +
+      user2Defender.player.playerAbilityMOBILITY * 0.7;
 
     //돌파가능 수치정하기
     //유저1
-    const user1DribbleSTR = user1STR + user2STR;
-    const user1DribbleMID = user1STR + user2MID;
-    const user1DribbleDEF = user1STR + user2DEF;
-    const user1RS = Math.random() * user1DribbleSTR;
-    const user1RM = Math.random() * user1DribbleMID;
-    const user1RD = Math.random() * user1DribbleDEF;
+    let user1DribbleSTR = user1STR + user2STR;
+    let user1DribbleMID = user1STR + user2MID;
+    let user1DribbleDEF = user1STR + user2DEF;
+    let user1RS = Math.random() * user1DribbleSTR;
+    let user1RM = Math.random() * user1DribbleMID;
+    let user1RD = Math.random() * user1DribbleDEF;
 
     //유저2
-    const user2DribbleSTR = user2STR + user1STR;
-    const user2DribbleMID = user2STR + user1MID;
-    const user2DribbleDEF = user2STR + user1DEF;
-    const user2RS = Math.random() * user2DribbleSTR;
-    const user2RM = Math.random() * user2DribbleMID;
-    const user2RD = Math.random() * user2DribbleDEF;
+    let user2DribbleSTR = user2STR + user1STR;
+    let user2DribbleMID = user2STR + user1MID;
+    let user2DribbleDEF = user2STR + user1DEF;
+    let user2RS = Math.random() * user2DribbleSTR;
+    let user2RM = Math.random() * user2DribbleMID;
+    let user2RD = Math.random() * user2DribbleDEF;
 
     let resultMessage = '';
-    const gameSession = await prisma.gameSession.findFirst({
+    let gameSession = await prisma.gameSession.findFirst({
       where: { gameSessionPID },
     });
 
@@ -226,15 +227,15 @@ router.post('/game-start', authMiddleware, async (req, res, next) => {
       resultMessage += `유저1 공격수의 드리블`;
       // 공격수 돌파시도
       if (user1RS < user1STR) {
-        resultMessage += `\n유저1의 ${user1Striker.playerName} 선수가 상대 ${user2Striker.playerName} 선수를 뚫고 지나갑니다. `;
+        resultMessage += `\n유저1의 ${user1Striker.player.playerName} 선수가 상대 ${user2Striker.player.playerName} 선수를 뚫고 지나갑니다. `;
 
         // 미드필더 돌파시도
         if (user1RM < user1STR) {
-          resultMessage += `\n유저1의 ${user1Striker.playerName} 선수가 상대 ${user2Midfielder.playerName} 선수를 뚫고 지나갑니다. `;
+          resultMessage += `\n유저1의 ${user1Striker.player.playerName} 선수가 상대 ${user2Midfielder.player.playerName} 선수를 뚫고 지나갑니다. `;
 
           // 수비수 돌파시도
           if (user1RD < user1STR) {
-            resultMessage += `\n유저1의 ${user1Striker.playerName} 선수가 상대 ${user2Defender.playerName} 선수를 뚫고 골을 넣었습니다!`;
+            resultMessage += `\n유저1의 ${user1Striker.player.playerName} 선수가 상대 ${user2Defender.player.playerName} 선수를 뚫고 골을 넣었습니다!`;
             currentUser_1Score++;
             resultMessage += `\n현재스코어 ${currentUser_1Score} : ${currentUser_2Score}`;
           } else {
@@ -257,15 +258,15 @@ router.post('/game-start', authMiddleware, async (req, res, next) => {
       resultMessage += `유저2 공격수의 드리블`;
       // 공격수 시도
       if (user2RS < user2STR) {
-        resultMessage += `\n유저2의 ${user2Striker.playerName} 선수가 상대 ${user1Striker.playerName} 선수를 뚫고 지나갑니다. `;
+        resultMessage += `\n유저2의 ${user2Striker.player.playerName} 선수가 상대 ${user1Striker.player.playerName} 선수를 뚫고 지나갑니다. `;
 
         // 미드필더 시도
         if (user2RM < user2STR) {
-          resultMessage += `\n유저2의 ${user2Striker.playerName} 선수가 상대 ${user1Midfielder.playerName} 선수를 뚫고 지나갑니다. `;
+          resultMessage += `\n유저2의 ${user2Striker.player.playerName} 선수가 상대 ${user1Midfielder.player.playerName} 선수를 뚫고 지나갑니다. `;
 
           // 수비수 시도
           if (user2RD < user2STR) {
-            resultMessage += `\n유저2의 ${user2Striker.playerName} 선수가 상대 ${user1Defender.playerName} 선수를 뚫고 골을 넣었습니다!`;
+            resultMessage += `\n유저2의 ${user2Striker.player.playerName} 선수가 상대 ${user1Defender.player.playerName} 선수를 뚫고 골을 넣었습니다!`;
             currentUser_2Score++;
             resultMessage += `\n현재스코어 ${currentUser_1Score} : ${currentUser_2Score}`;
           } else {
@@ -303,7 +304,7 @@ router.post('/game-start', authMiddleware, async (req, res, next) => {
 //경기종료
 router.delete('/game-end', authMiddleware, async (req, res, next) => {
   try {
-    const { gameSessionPID } = req.user.gameSessionPID;
+    const { gameSessionPID } = req.user;
     //유저데이터
     const user_data = await prisma.gameSession.findUnique({
       where: {
@@ -378,7 +379,7 @@ router.delete('/game-end', authMiddleware, async (req, res, next) => {
         },
       });
     }
-    await prisma.gameSessionHestory.create({
+    await prisma.gameSessionHistory.create({
       data: {
         userPID_1: userPID_1,
         userPID_2: userPID_2,
@@ -388,7 +389,7 @@ router.delete('/game-end', authMiddleware, async (req, res, next) => {
     });
     await prisma.gameSession.delete({
       where: {
-        gameSession: gameSessionPID,
+        gameSessionPID: gameSessionPID,
       },
     });
     res.status(200).json({
