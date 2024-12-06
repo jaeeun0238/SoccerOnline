@@ -69,7 +69,7 @@ router.post('/game/match', authMiddleware, async (req, res, next) => {
   }
 });
 
-router.post('/game-start', async (req, res, next) => {
+router.post('/game-start', authMiddleware, async (req, res, next) => {
   try {
     const { gameSessionPID } = req.user.gameSessionPID;
 
@@ -289,33 +289,100 @@ router.post('/game-start', async (req, res, next) => {
   }
 });
 
-//게임종료
-router.delete('/game-end/:gameSessionPID', async (req, res, next) => {
-  const gameSessionPID = req.params.gameSessionPID;
+//경기종료
+router.delete('/game-end', authMiddleware, async (req, res, next) => {
   try {
-    const gameSession = await prisma.gameSession.findFirst({
-      where: { gameSessionPID: +gameSessionPID },
+    const { gameSessionPID } = req.user.gameSessionPID;
+    //유저데이터
+    const user_data = await prisma.gameSession.findUnique({
+      where: {
+        gameSessionPID: gameSessionPID,
+      },
       include: {
-        userData: true,
+        userData: {
+          include: {
+            playerSquadsData: {
+              include: {
+                playerEquipRostersData: true,
+              },
+            },
+          },
+        },
       },
     });
-    if (!sessionSearch) {
-      throw {
-        status: 404,
-        message: '게임세션이 존재하지 않습니다.',
-      };
+    const userPID_1 = user_data.userData[0].userPID;
+    const userPID_2 = user_data.userData[1].userPID;
+    //유저스코어
+    if (user_data.userScore_1 > user_data.userScore_2) {
+      await prisma.userData.update({
+        where: {
+          userPID: userPID_1,
+        },
+        data: {
+          userScore: user_data.userData[0].userScore + 10,
+        },
+      });
+      await prisma.userData.update({
+        where: {
+          userPID: userPID_2,
+        },
+        data: {
+          userScore: user_data.userData[1].userScore - 10,
+        },
+      });
     }
-
-    /*승패 기록?*/
-    await prisma.gameSessionHistory.create({
+    if (user_data.userScore_1 < user_data.userScore_2) {
+      await prisma.userData.update({
+        where: {
+          userPID: userPID_2,
+        },
+        data: {
+          userScore: user_data.userData[1].userScore + 10,
+        },
+      });
+      await prisma.userData.update({
+        where: {
+          userPID: userPID_1,
+        },
+        data: {
+          userScore: user_data.userData[0].userScore - 10,
+        },
+      });
+    }
+    if (user_data.userScore_1 === user_data.userScore_2) {
+      await prisma.userData.update({
+        where: {
+          userPID: userPID_1,
+        },
+        data: {
+          userScore: user_data.userData[0].userScore,
+        },
+      });
+      await prisma.userData.update({
+        where: {
+          userPID: userPID_2,
+        },
+        data: {
+          userScore: user_data.userData[1].userScore,
+        },
+      });
+    }
+    await prisma.gameSessionHestory.create({
       data: {
-        userPID_1: gameSession.userPID_1,
-        userPID_2: gameSession.userPID_2,
-        userScore_1: gameSession.userScore_1,
-        userScore_2: gameSession.userScore_2,
+        userPID_1: userPID_1,
+        userPID_2: userPID_2,
+        userScore_1: user_data.userScore_1,
+        userScore_2: user_data.userScore_2,
       },
     });
-    res.status(200).json({});
+    await prisma.gameSession.delete({
+      where: {
+        gameSession: gameSessionPID,
+      },
+    });
+    res.status(200).json({
+      경기종료: `${user_data.userScore_1} : ${user_data.userScore_2}`,
+    });
   } catch (err) {
     next(err);
   }
