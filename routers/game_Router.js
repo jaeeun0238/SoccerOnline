@@ -5,148 +5,382 @@ import authMiddleware from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
-//게임 생성                 //유저인증
+//게임 매칭 완성
+router.post('/game/match', authMiddleware, async (req, res, next) => {
+  const user_1 = req.user.userPID;
+  const user_1_score = req.user.userScore;
+  try {
+    //스코어 계산
+    const max_score = user_1_score + 500;
+    const min_score = user_1_score - 500;
+    //스코어에 어울리는 사람 찾기
+    const user_2 = await prisma.userData.findFirst({
+      where: {
+        NOT: {
+          userPID: user_1,
+        },
+        gameSessionPID: null,
+        userScore: {
+          gte: min_score,
+          lte: max_score,
+        },
+      },
+      select: {
+        userPID: true,
+      },
+    });
+    //매칭 실패
+    if (!user_2) {
+      throw { status: 404, message: ' 적합한 유저를 찾지 못했습니다. ' };
+    }
+    //성공시 트렌잭션으로 생성하고 플레이어 데이터에 pid 추가
+    const [game] = await prisma.$transaction(async (tx) => {
+      const game = await tx.gameSession.create({
+        data: {
+          userScore_1: 0,
+          userScore_2: 0,
+          sessionTurn: 0,
+        },
+      });
+      await tx.userData.update({
+        where: {
+          userPID: user_1,
+        },
+        data: {
+          gameSessionPID: game.gameSessionPID,
+        },
+      });
+      await tx.userData.update({
+        where: {
+          userPID: user_2.userPID,
+        },
+        data: {
+          gameSessionPID: game.gameSessionPID,
+        },
+      });
+      return [game];
+    });
+    if (!game) {
+      throw { status: 500, message: ' 매칭에 실패했습니다. ' };
+    }
+    res.status(200).json({ date: '적합한 상대와 매칭되었습니다.' });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post('/game-start', authMiddleware, async (req, res, next) => {
   try {
-    const userPID = req.user;
-    const enemySquad = req.body.playerSquadsPID;
+    const { gameSessionPID } = req.user.gameSessionPID;
 
-    //인증된 유저PID를 가지고 있는 스쿼드정보
-    const myRosterInfo = await prisma.playerSquadsData.findFirst({
+    const user_data = await prisma.gameSession.findUnique({
       where: {
-        userPID: +userPID,
+        gameSessionPID: gameSessionPID,
+      },
+      include: {
+        userData: {
+          include: {
+            playerSquadsData: {
+              include: {
+                playerEquipRostersData: true,
+              },
+            },
+          },
+        },
       },
     });
 
-    //body에서 입력한 스쿼드PID를 가진 스쿼드정보
-    const enemyRosterInfo = await prisma.playerSquadsData.findFirst({
-      where: {
-        playerSquadsPID: +enemySquad,
-      },
-    });
-    if (!enemyRosterInfo) {
-      return res.status(404).json({ error: '스쿼드를 찾을수 없습니다' });
+    let user_1_player = [];
+
+    // 유저 데이터[0] 첫번째 유저의 스쿼드데이터에 플레이어 로스터 데이터의 갯수만큼 반복
+    for (
+      let i = 0;
+      i <
+      user_data.userData[0].playerSquadsData[0].playerEquipRostersData.length;
+      i++
+    ) {
+      // 유저 데이터[0] 첫번째 유저의 스쿼드데이터에 플레이어 로스터 데이터의[i]번째의 playerRostPID의 보유선수 데이터 잘하면 여기 스킵 가능
+      const isPlayer_temp = await prisma.playerRostersData.findUnique({
+        where: {
+          playerRostersPID:
+            user_data.userData[0].playerSquadsData[0].playerEquipRostersData[i]
+              .playerRostersPID,
+        },
+      });
+      // 그 받아온 선수의 데이터를 선수데이터 db를 불러와서 선수의 실질적인 데이터 받아오기.
+      const player = await prisma.playerData.findUnique({
+        where: { playerPID: isPlayer_temp.playerPID },
+      });
+      //여기서 플레이어 선수 푸쉬 해주기
+      user_1_player.push({
+        player: player,
+        playerPosition:
+          user_data.userData[0].playerSquadsData[0].playerEquipRostersData[i]
+            .position,
+      });
     }
 
-    //유저의 스트라이커장착 로스터
-    const myEquipStrikerRoster = await prisma.playerEquipRostersData.findFirst({
-      where: {
-        playerRostersPID: myRosterInfo.playerRostersPID,
-        position: 0,
-      },
-    });
-
-    //상대의 스트라이커장착 로스터
-    const enemyEquipStrikerRoster =
-      await prisma.playerEquipRostersData.findFirst({
+    //유저2선수
+    let user_2_player = [];
+    for (
+      let i = 0;
+      i <
+      user_data.userData[1].playerSquadsData[0].playerEquipRostersData.length;
+      i++
+    ) {
+      const isPlayer_temp = await prisma.playerRostersData.findUnique({
         where: {
-          playerRostersPID: enemyRosterInfo.playerRostersPID,
-          position: 0,
+          playerRostersPID:
+            user_data.userData[1].playerSquadsData[0].playerEquipRostersData[i]
+              .playerRostersPID,
         },
       });
-
-    const myStrikerPlayerData = await prisma.playerData.findFirst({
-      where: {
-        playerPID: myEquipStrikerRoster.playerPID,
-      },
-    });
-
-    const enemyStrikerPlayerData = await prisma.playerData.findFirst({
-      where: {
-        playerPID: enemyEquipStrikerRoster.playerPID,
-      },
-    });
-
-    //유저의 미드필더장착 로스터
-    const myEquipMidfielderRoster =
-      await prisma.playerEquipRostersData.findFirst({
-        where: {
-          playerRostersPID: myRosterInfo.playerRostersPID,
-          position: 1,
-        },
+      const player = await prisma.playerData.findUnique({
+        where: { playerPID: isPlayer_temp.playerPID },
       });
-
-    //상대의 미드필더장착 로스터
-    const enemyEquipMidfielderRoster =
-      await prisma.playerEquipRostersData.findFirst({
-        where: {
-          playerRostersPID: enemyRosterInfo.playerRostersPID,
-          position: 1,
-        },
+      user_2_player.push({
+        player: player,
+        playerPosition:
+          user_data.userData[1].playerSquadsData[0].playerEquipRostersData[i]
+            .position,
       });
+    }
 
-    const myMidfielderPlayerData = await prisma.playerData.findFirst({
-      where: {
-        playerPID: myEquipMidfielderRoster.playerPID,
-      },
+    const user1Striker = user_1_player[0];
+    const user1Midfielder = user_1_player[1];
+    const user1Defender = user_1_player[2];
+    const user2Striker = user_2_player[0];
+    const user2Midfielder = user_2_player[1];
+    const user2Defender = user_2_player[2];
+
+    //스탯 정규화
+    //유저1
+    const user1STR =
+      user1Striker.playerAbilityATCK * 1.1 +
+      user1Striker.playerAbilityDEFEND * 0.8 +
+      user1Striker.playerAbilityMOBILITY * 0.7;
+    const user1MID =
+      user1Midfielder.playerAbilityATCK +
+      user1Midfielder.playerAbilityDEFEND * 0.8 +
+      user1Midfielder.playerAbilityMOBILITY;
+    const user1DEF =
+      user1Defender.playerAbilityATCK * 0.8 +
+      user1Defender.playerAbilityDEFEND * 1.2 +
+      user1Defender.playerAbilityMOBILITY * 0.7;
+
+    //유저2
+    const user2STR =
+      user2Striker.playerAbilityATCK * 1.1 +
+      user2Striker.playerAbilityDEFEND * 0.8 +
+      user2Striker.playerAbilityMOBILITY * 0.7;
+    const user2MID =
+      user2Midfielder.playerAbilityATCK +
+      user2Midfielder.playerAbilityDEFEND * 0.8 +
+      user2Midfielder.playerAbilityMOBILITY;
+    const user2DEF =
+      user2Defender.playerAbilityATCK * 0.8 +
+      user2Defender.playerAbilityDEFEND * 1.2 +
+      user2Defender.playerAbilityMOBILITY * 0.7;
+
+    //돌파가능 수치정하기
+    //유저1
+    const user1DribbleSTR = user1STR + user2STR;
+    const user1DribbleMID = user1STR + user2MID;
+    const user1DribbleDEF = user1STR + user2DEF;
+    const user1RS = Math.random() * user1DribbleSTR;
+    const user1RM = Math.random() * user1DribbleMID;
+    const user1RD = Math.random() * user1DribbleDEF;
+
+    //유저2
+    const user2DribbleSTR = user2STR + user1STR;
+    const user2DribbleMID = user2STR + user1MID;
+    const user2DribbleDEF = user2STR + user1DEF;
+    const user2RS = Math.random() * user2DribbleSTR;
+    const user2RM = Math.random() * user2DribbleMID;
+    const user2RD = Math.random() * user2DribbleDEF;
+
+    let resultMessage = '';
+    const gameSession = await prisma.gameSession.findFirst({
+      where: { gameSessionPID },
     });
 
-    const enemyMidfielderPlayerData = await prisma.playerData.findFirst({
-      where: {
-        playerPID: enemyEquipMidfielderRoster.playerPID,
-      },
-    });
+    let currentTurn = gameSession ? gameSession.sessionTurn : 0;
+    let currentUser_1Score = gameSession ? gameSession.userScore_1 : 0;
+    let currentUser_2Score = gameSession ? gameSession.userScore_2 : 0;
 
-    //유저의 디펜더장착 로스터
-    const myEquipDefenderRoster = await prisma.playerEquipRostersData.findFirst(
-      {
-        where: {
-          playerRostersPID: myRosterInfo.playerRostersPID,
-          position: 2,
-        },
-      },
-    );
+    if (currentTurn % 2 === 0) {
+      //유저1
+      resultMessage += `유저1 공격수의 드리블`;
+      // 공격수 돌파시도
+      if (user1RS < user1STR) {
+        resultMessage += `\n유저1의 ${user1Striker.playerName} 선수가 상대 ${user2Striker.playerName} 선수를 뚫고 지나갑니다. `;
 
-    //상대의 디펜더장착 로스터
-    const enemyEquipDefenderRoster =
-      await prisma.playerEquipRostersData.findFirst({
-        where: {
-          playerRostersPID: enemyRosterInfo.playerRostersPID,
-          position: 2,
-        },
-      });
+        // 미드필더 돌파시도
+        if (user1RM < user1STR) {
+          resultMessage += `\n유저1의 ${user1Striker.playerName} 선수가 상대 ${user2Midfielder.playerName} 선수를 뚫고 지나갑니다. `;
 
-    const myDefenderPlayerData = await prisma.playerData.findFirst({
-      where: {
-        playerPID: myEquipDefenderRoster.playerPID,
-      },
-    });
-
-    const enemyDefenderPlayerData = await prisma.playerData.findFirst({
-      where: {
-        playerPID: enemyEquipDefenderRoster.playerPID,
-      },
-    });
-
-    //수정필요
-    const mySquadScore = myStrikerPlayerData.playerAbilityATCK;
-    const enemySquadScore = enemyStrikerPlayerData.playerAbilityATCK;
-
-    const maxScore = mySquadScore + enemySquadScore;
-
-    const randomValue = Math.random() * maxScore;
-
-    let myScore, enemyScore, result;
-
-    if (randomValue < mySquadScore) {
-      // 유저 승리 처리
-      myScore = Math.floor(Math.random() * 4) + 2; // 2에서 5 사이
-      enemyScore = Math.floor(Math.random() * Math.min(3, myScore)); // myScore보다 작은 값을 설정
-      result = `승리: 유저 ${myScore} - ${enemyScore} 상대`;
+          // 수비수 돌파시도
+          if (user1RD < user1STR) {
+            resultMessage += `\n유저1의 ${user1Striker.playerName} 선수가 상대 ${user2Defender.playerName} 선수를 뚫고 골을 넣었습니다!`;
+            currentUser_1Score++;
+            resultMessage += `\n현재스코어 ${currentUser_1Score} : ${currentUser_2Score}`;
+          } else {
+            resultMessage +=
+              '\n상대 수비수에게 막혔습니다. 공이 유저2 공격수에게 패스됩니다.';
+            currentTurn++;
+          }
+        } else {
+          resultMessage +=
+            '\n상대 미드필더에게 막혔습니다. 공이 유저2 공격수에게 패스됩니다.';
+          currentTurn++;
+        }
+      } else {
+        resultMessage +=
+          '\n상대 공격수에게 막혔습니다. 유저2 공격수가 드리블합니다.';
+        currentTurn++;
+      }
     } else {
-      // 상대 유저 승리 처리
-      enemyScore = Math.floor(Math.random() * 4) + 2; // 2에서 5 사이
-      myScore = Math.floor(Math.random() * Math.min(3, enemyScore)); // enemyScore보다 작은 값을 설정
-      result = `패배: 상대 ${enemyScore} - ${myScore} 유저`;
+      //유저2
+      resultMessage += `유저2 공격수의 드리블`;
+      // 공격수 시도
+      if (user2RS < user2STR) {
+        resultMessage += `\n유저2의 ${user2Striker.playerName} 선수가 상대 ${user1Striker.playerName} 선수를 뚫고 지나갑니다. `;
+
+        // 미드필더 시도
+        if (user2RM < user2STR) {
+          resultMessage += `\n유저2의 ${user2Striker.playerName} 선수가 상대 ${user1Midfielder.playerName} 선수를 뚫고 지나갑니다. `;
+
+          // 수비수 시도
+          if (user2RD < user2STR) {
+            resultMessage += `\n유저2의 ${user2Striker.playerName} 선수가 상대 ${user1Defender.playerName} 선수를 뚫고 골을 넣었습니다!`;
+            currentUser_2Score++;
+            resultMessage += `\n현재스코어 ${currentUser_1Score} : ${currentUser_2Score}`;
+          } else {
+            resultMessage +=
+              '\n상대 수비수가 막았습니다. 공을 유저1 공격수에게 패스합니다.';
+            currentTurn++;
+          }
+        } else {
+          resultMessage +=
+            '\n상대 미드필더가 막았습니다. 공을 유저1 공격수에게 패스합니다.';
+          currentTurn++;
+        }
+      } else {
+        resultMessage +=
+          '\n상대 공격수가 막았습니다. 유저1 공격수가 드리블합니다.';
+        currentTurn++;
+      }
     }
 
-    //게임 전적
-    // await prisma.game_Records.create({
-    //   data: {
-    //     gameRecord: result,
-    //   },
-    // });
-    return res.status(200).json({ data: result });
+    await prisma.gameSession.update({
+      where: { gameSessionPID },
+      data: {
+        sessionTurn: currentTurn,
+        userScore_1: currentUser_1Score,
+        userScore_2: currentUser_2Score,
+      },
+    });
+
+    res.status(200).json({ message: resultMessage });
+  } catch (err) {
+    next(err);
+  }
+});
+
+//경기종료
+router.delete('/game-end', authMiddleware, async (req, res, next) => {
+  try {
+    const { gameSessionPID } = req.user.gameSessionPID;
+    //유저데이터
+    const user_data = await prisma.gameSession.findUnique({
+      where: {
+        gameSessionPID: gameSessionPID,
+      },
+      include: {
+        userData: {
+          include: {
+            playerSquadsData: {
+              include: {
+                playerEquipRostersData: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    const userPID_1 = user_data.userData[0].userPID;
+    const userPID_2 = user_data.userData[1].userPID;
+    //유저스코어
+    if (user_data.userScore_1 > user_data.userScore_2) {
+      await prisma.userData.update({
+        where: {
+          userPID: userPID_1,
+        },
+        data: {
+          userScore: user_data.userData[0].userScore + 10,
+        },
+      });
+      await prisma.userData.update({
+        where: {
+          userPID: userPID_2,
+        },
+        data: {
+          userScore: user_data.userData[1].userScore - 10,
+        },
+      });
+    }
+    if (user_data.userScore_1 < user_data.userScore_2) {
+      await prisma.userData.update({
+        where: {
+          userPID: userPID_2,
+        },
+        data: {
+          userScore: user_data.userData[1].userScore + 10,
+        },
+      });
+      await prisma.userData.update({
+        where: {
+          userPID: userPID_1,
+        },
+        data: {
+          userScore: user_data.userData[0].userScore - 10,
+        },
+      });
+    }
+    if (user_data.userScore_1 === user_data.userScore_2) {
+      await prisma.userData.update({
+        where: {
+          userPID: userPID_1,
+        },
+        data: {
+          userScore: user_data.userData[0].userScore,
+        },
+      });
+      await prisma.userData.update({
+        where: {
+          userPID: userPID_2,
+        },
+        data: {
+          userScore: user_data.userData[1].userScore,
+        },
+      });
+    }
+    await prisma.gameSessionHestory.create({
+      data: {
+        userPID_1: userPID_1,
+        userPID_2: userPID_2,
+        userScore_1: user_data.userScore_1,
+        userScore_2: user_data.userScore_2,
+      },
+    });
+    await prisma.gameSession.delete({
+      where: {
+        gameSession: gameSessionPID,
+      },
+    });
+    res.status(200).json({
+      경기종료: `${user_data.userScore_1} : ${user_data.userScore_2}`,
+    });
   } catch (err) {
     next(err);
   }

@@ -149,4 +149,26 @@ router.patch('/buyCash', authMiddleware, async (req, res, next) => {
   }
 });
 
+//유저 랭킹 조회
+router.get('/user/rankings', async (req, res, next) => {
+  const ranking = await prisma.userData.findMany({
+    select: {
+      userName: true,
+      userScore: true,
+    },
+    orderBy: {
+      userScore: 'desc',
+    },
+    take: 10,
+  });
+
+  const userRanking = ranking.map((ranking, index) => ({
+    ranking: index + 1,
+    userName: ranking.userName,
+    Score: ranking.userScore,
+  }));
+
+  return res.status(200).json({ data: userRanking });
+});
+
 export default router;
