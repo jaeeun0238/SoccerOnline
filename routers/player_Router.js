@@ -119,7 +119,6 @@ router.post('/player/gacha', authenticateJWT, async (req, res) => {
 
 //선수 강화 API
 const upgradePlayer = async (req, res, next) => {
-  
   const maxUpgrade = 10; // 최대 강화 단계
 
   try {
@@ -147,7 +146,7 @@ const upgradePlayer = async (req, res, next) => {
     }
 
     // playerPID를 통해 playerData 조회
-    const playerStats = await prisma.playerData.findUnique({
+    const playerStats = await prisma.playerData.findFirst({
       where: {
         playerPID: existingPlayer.playerPID, // existingPlayer에서 playerPID를 사용하여 조회
       },
@@ -158,8 +157,15 @@ const upgradePlayer = async (req, res, next) => {
     }
 
     // 강화 재료 확인
-    if (!materials || !Array.isArray(materials) || materials.length < 1 || materials.length > 5) {
-      return res.status(400).json({ message: '강화에 최소 1명의 선수, 최대 5명이 필요합니다.' });
+    if (
+      !materials ||
+      !Array.isArray(materials) ||
+      materials.length < 1 ||
+      materials.length > 5
+    ) {
+      return res
+        .status(400)
+        .json({ message: '강화에 최소 1명의 선수, 최대 5명이 필요합니다.' });
     }
 
     const materialCheck = await prisma.playerRostersData.findMany({
@@ -182,13 +188,17 @@ const upgradePlayer = async (req, res, next) => {
 
     // 강화 재료가 유저 보유 선수인지 확인
     if (materialCheck.length !== materials.length) {
-      return res.status(400).json({ message: '강화 재료로 사용할 선수는 보유 선수가 아닙니다.' });
+      return res
+        .status(400)
+        .json({ message: '강화 재료로 사용할 선수는 보유 선수가 아닙니다.' });
     }
 
     // 현재 강화 단계 확인
     const currentUpgradeLevel = existingPlayer.playerEnchant || 0; // 현재 강화 단계
     if (currentUpgradeLevel >= maxUpgrade) {
-      return res.status(400).json({ message: '선수는 이미 최대 강화 단계에 도달했습니다.' });
+      return res
+        .status(400)
+        .json({ message: '선수는 이미 최대 강화 단계에 도달했습니다.' });
     }
 
     //강화 확률 설정
@@ -230,7 +240,7 @@ const upgradePlayer = async (req, res, next) => {
     }
 
     //강화 성공 시 선수 어빌리티 증가량 설정
-    let upgradeAbility = 0
+    let upgradeAbility = 0;
     switch (existingPlayer.playerEnchant) {
       case 0:
         upgradeAbility += 1;
@@ -266,7 +276,7 @@ const upgradePlayer = async (req, res, next) => {
         break;
     }
 
-    const isSuccess = Math.random() * 100 <= maxSuccessRate
+    const isSuccess = Math.random() * 100 <= maxSuccessRate;
 
     // 강화 실패 처리
     if (!isSuccess) {
@@ -303,14 +313,14 @@ const upgradePlayer = async (req, res, next) => {
         },
       });
       // 트랜잭션 내에서 변경된 데이터를 반환
-      return updatedRosterPlayer;  // 트랜잭션이 끝날 때 반환
+      return updatedRosterPlayer; // 트랜잭션이 끝날 때 반환
     });
 
-      return res.status(200).json({
-        message: `선수 강화가 완료되었습니다!`,
-        //updatedPlayer,
-        updatedRosterPlayer: result //단일 객체로 바로 접근
-      });
+    return res.status(200).json({
+      message: `선수 강화가 완료되었습니다!`,
+      //updatedPlayer,
+      updatedRosterPlayer: result, //단일 객체로 바로 접근
+    });
   } catch (err) {
     next(err);
   }

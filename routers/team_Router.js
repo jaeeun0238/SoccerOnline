@@ -45,7 +45,7 @@ router.delete(
   authMiddleware,
   async (req, res, next) => {
     const { playerRostersPID } = req.params;
-    const { userPID } = userPID;
+    const { userPID } = req.user;
     try {
       let data_temp = await Unequip(+userPID, +playerRostersPID, next);
       return res
