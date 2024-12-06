@@ -14,10 +14,10 @@ router.post('/game/match', authMiddleware, async (req, res, next) => {
     const max_score = user_1_score + 500;
     const min_score = user_1_score - 500;
     //스코어에 어울리는 사람 찾기
-    const user_2 = await prisma.userData.findFirst({
+    const user_temp = await prisma.userData.findMany({
       where: {
         NOT: {
-          userPID: user_1,
+          userPID: +user_1,
         },
         gameSessionPID: null,
         userScore: {
@@ -25,9 +25,22 @@ router.post('/game/match', authMiddleware, async (req, res, next) => {
           lte: max_score,
         },
       },
+      take: 10,
       select: {
         userPID: true,
       },
+      include: {
+        playerSquadsData: {
+          include: {
+            playerEquipRostersData: true,
+          },
+        },
+      },
+    });
+    const user_2 = user_temp.forEach((user_data) => {
+      if (user_data.playerSquadsData[0].playerEquipRostersData.length >= 3) {
+        return user_data;
+      }
     });
     //매칭 실패
     if (!user_2) {
