@@ -111,13 +111,6 @@ router.post('/game-start', async (req, res, next) => {
       // 그 받아온 선수의 데이터를 선수데이터 db를 불러와서 선수의 실질적인 데이터 받아오기.
       const player = await prisma.playerData.findUnique({
         where: { playerPID: isPlayer_temp.playerPID },
-        include: {
-          playerRostersData: {
-            include: {
-              playerEquipRostersData: true,
-            },
-          },
-        },
       });
       //여기서 플레이어 선수 푸쉬 해주기
       user_1_player.push({
@@ -128,25 +121,39 @@ router.post('/game-start', async (req, res, next) => {
       });
     }
 
-    const user2data = await prisma.userData.findUnique({
-      where: { userID: userPID_2 },
-      include: {
-        playerRostersData: {
-          include: {
-            playerEquipRostersData: true,
-          },
+    //유저2선수
+    let user_2_player = [];
+    for (
+      let i = 0;
+      i < user_data.userData[1].playerSquadsData.playerEquipRostersData.length;
+      i++
+    ) {
+      const isPlayer_temp = await prisma.playerRostersData.findUnique({
+        where: {
+          playerRostersPID:
+            user_data.userData[1].playerSquadsData.playerEquipRostersData[i]
+              .playerRostersPID,
         },
-      },
-    });
+      });
+      // 그 받아온 선수의 데이터를 선수데이터 db를 불러와서 선수의 실질적인 데이터 받아오기.
+      const player = await prisma.playerData.findUnique({
+        where: { playerPID: isPlayer_temp.playerPID },
+      });
+      //여기서 플레이어 선수 푸쉬 해주기
+      user_2_player.push({
+        player: player,
+        playerPosition:
+          user_data.userData[1].playerSquadsData.playerEquipRostersData[i]
+            .position,
+      });
+    }
 
-    /*const
-    
-    user1Midfielder;
-    user1Defender;
-    user2Striker;
-    user2Midfielder;
-    user2Defender;
-    */
+    const user1Striker = user_1_player[0];
+    const user1Midfielder = user_1_player[1];
+    const user1Defender = user_1_player[2];
+    const user2Striker = user_2_player[0];
+    const user2Midfielder = user_2_player[1];
+    const user2Defender = user_2_player[2];
 
     //스탯 정규화
     //유저1
@@ -198,34 +205,6 @@ router.post('/game-start', async (req, res, next) => {
     const gameSession = await prisma.gameSession.findFirst({
       where: { gameSessionPID },
     });
-
-    // if (!gameSession) {
-    //   await prisma.gameSession.create({
-    //     data: {
-    //       gameSessionPID,
-    //       userScore_1: 0,
-    //       userScore_2: 0,
-    //       sessionTurn: 0,
-    //     },
-    //   });
-    // }
-
-    // await prisma.userData.update({
-    //   where: {
-    //     userPID: +userPID_1,
-    //   },
-    //   data: {
-    //     gameSessionPID: gameSessionPID,
-    //   },
-    // });
-    // await prisma.userData.update({
-    //   where: {
-    //     userPID: +userPID_2,
-    //   },
-    //   data: {
-    //     gameSessionPID: gameSessionPID,
-    //   },
-    // });
 
     let currentTurn = gameSession ? gameSession.sessionTurn : 0;
     let currentUser_1Score = gameSession ? gameSession.userScore_1 : 0;
