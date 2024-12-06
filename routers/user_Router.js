@@ -151,24 +151,36 @@ router.patch('/buyCash', authMiddleware, async (req, res, next) => {
 
 //유저 랭킹 조회
 router.get('/user/rankings', async (req, res, next) => {
-  const ranking = await prisma.userData.findMany({
-    select: {
-      userName: true,
-      userScore: true,
-    },
-    orderBy: {
-      userScore: 'desc',
-    },
-    take: 10,
-  });
+  try {
+    const ranking = await prisma.userData.findMany({
+      select: {
+        userName: true,
+        userScore: true,
+      },
+      orderBy: {
+        userScore: 'desc',
+      },
+      take: 10,
+    });
 
-  const userRanking = ranking.map((ranking, index) => ({
-    ranking: index + 1,
-    userName: ranking.userName,
-    Score: ranking.userScore,
-  }));
-
-  return res.status(200).json({ data: userRanking });
+    const userRanking = ranking.map((user, index, array) => {
+      if (index > 0 && array[index - 1].userScore === user.userScore) {
+        return {
+          ranking: array[index - 1].ranking,
+          userName: user.userName,
+          Score: user.userScore,
+        };
+      }
+      return {
+        ranking: index + 1,
+        userName: user.userName,
+        Score: user.userScore,
+      };
+    });
+    return res.status(200).json({ rank: userRanking });
+  } catch (err) {
+    return res.status(500).json({ error: '서버 오류입니다.' });
+  }
 });
 
 export default router;
