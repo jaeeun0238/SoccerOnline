@@ -2,7 +2,9 @@
 
 <h3>Project - 풋살을 활용한 스포츠게임 개발</h3>
 
---- 설명 --
+게임서버 트랙 팀 프로젝트에서 개발한 풋살 온라인은 넥슨의 (현재 FC온라인) 피파 온라인 4를 오마주하여 만들어진 스포츠 게임입니다.<br>
+해당 프로젝트를 통해 웹 서버 기반에서 사용자 인증 및 권한 관리, 결제 기본 개념, 실시간 데이터 처리, 데이터 기반 아웃게임 로직 구현과 같은 것들에<br>
+대해 알 수 있습니다.
 
 <br>
 
@@ -63,6 +65,10 @@ $ node app.js
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=Prisma&logoColor=white)
 ![AmazonRDS](https://img.shields.io/badge/AmazonRDS-527FFF?style=for-the-badge&logo=AmazonRDS&logoColor=white)
+
+### Communication
+![Slack](https://img.shields.io/badge/Slack-4A154B?style=for-the-badge&logo=Slack&logoColor=white)
+![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=Notion&logoColor=white)
 
 <br>
 
@@ -199,6 +205,9 @@ https://teamsparta.notion.site/13f2dc3ef51481428498f6823ea158a2?v=13f2dc3ef51481
 <br>
 
 ## 아키텍쳐
+### ERDIAGRAM
+![image](https://github.com/user-attachments/assets/600117ab-f8a2-4c53-9640-c1324a98b392)
+
 ### 디렉토리 구조
 ```
 ├── app.js
