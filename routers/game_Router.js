@@ -90,8 +90,6 @@ router.post('/game-start', authMiddleware, async (req, res, next) => {
       },
     });
 
-    const userPID_1 = user_data.userData[0].userPID;
-    const userPID_2 = user_data.userData[1].userPID;
     let user_1_player = [];
 
     // 유저 데이터[0] 첫번째 유저의 스쿼드데이터에 플레이어 로스터 데이터의 갯수만큼 반복
