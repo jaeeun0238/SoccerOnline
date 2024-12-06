@@ -1,4 +1,4 @@
-# 📖 Futsal Online Project
+# ⚽ Futsal Online Project
 
 <h3>Project - 풋살을 활용한 스포츠게임 개발</h3>
 
@@ -7,7 +7,8 @@
 <br>
 
 ### 2FutsalOnline v1.0
-> **1.0v :  2024.12.02 ~ 2024.12.09** <br/>
+> **아자아자화이팅하조❣😋**<br>
+> **v1.0 :  2024.12.02 ~ 2024.12.09** <br/>
 
 <br>
 
@@ -23,7 +24,7 @@
 
 <br/>
 
-# 💡 시작 가이드
+# 📕 시작 가이드
 ###
 <h3>Requirements</h3>
 For building and running the application you need:
@@ -44,6 +45,9 @@ $ yarn
 $ node app.js
 ```
 ---
+<br>
+
+## 📖 Stacks
 ### Environment
 ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-007ACC?style=for-the-badge&logo=Visual%20Studio%20Code&logoColor=white)
 ![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=Git&logoColor=white)
@@ -60,12 +64,9 @@ $ node app.js
 ![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=Prisma&logoColor=white)
 ![AmazonRDS](https://img.shields.io/badge/AmazonRDS-527FFF?style=for-the-badge&logo=AmazonRDS&logoColor=white)
 
-
 <br>
 
-   <h3> 📌 개발 파트 </h3>
-   <br>
-   
+## 📌 개발 파트
 <details>
   <summary>유재윤</summary>
  <br>
@@ -177,5 +178,50 @@ $ node app.js
     </li>
   </ul>
 </details>
-   
+
+---
 <br>
+
+## 🖥️ 와이어 프레임
+| 기본 구조 |
+| :--------------------------------------------: |
+![image](https://github.com/user-attachments/assets/dffc7d9c-969c-4f2e-bd99-6df829cd39ba)
+|회색 : 필수 기능&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;노랑 : 도전 기능&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;주황 : 스페셜 기능|
+
+<br>
+<br>
+
+## 📘 API 명세서
+
+https://teamsparta.notion.site/13f2dc3ef51481428498f6823ea158a2?v=13f2dc3ef5148180b522000c82ee4a58&pvs=4
+
+<br>
+<br>
+
+## 아키텍쳐
+### 디렉토리 구조
+```
+├── app.js
+├── middlewares
+│   ├── auth.middleware.js
+│   └── error.middleware.js
+├── package.json
+├── prisma
+│   └── schema.prisma
+├── routers
+│   ├── game_Router.js
+│   ├── player_Router.js
+│   ├── team_Router.js
+│   └── user_Router.js
+├── uts
+│   └── prisma
+│       └── index.js
+└── yarn.lock
+
+```
+
+## API 요청 📺
+   
+| API 요청 화면 |
+| :--------------------------------------------: |
+|  |
