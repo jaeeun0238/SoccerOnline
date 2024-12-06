@@ -218,7 +218,7 @@ https://teamsparta.notion.site/13f2dc3ef51481428498f6823ea158a2?v=13f2dc3ef51481
 
 ## 아키텍쳐
 ### ERD DIAGRAM
-![image](https://github.com/user-attachments/assets/600117ab-f8a2-4c53-9640-c1324a98b392)
+![image](https://github.com/user-attachments/assets/65600abc-a3d7-472d-954d-344185525987)
 
 ### 디렉토리 구조
 ```
