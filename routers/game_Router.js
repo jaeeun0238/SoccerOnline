@@ -168,33 +168,33 @@ router.post('/game-start', async (req, res, next) => {
       where: { gameSessionPID },
     });
 
-    if (!gameSession) {
-      await prisma.gameSession.create({
-        data: {
-          gameSessionPID,
-          userScore_1: 0,
-          userScore_2: 0,
-          sessionTurn: 0,
-        },
-      });
-    }
+    // if (!gameSession) {
+    //   await prisma.gameSession.create({
+    //     data: {
+    //       gameSessionPID,
+    //       userScore_1: 0,
+    //       userScore_2: 0,
+    //       sessionTurn: 0,
+    //     },
+    //   });
+    // }
 
-    await prisma.userData.update({
-      where: {
-        userPID: +userPID_1,
-      },
-      data: {
-        gameSessionPID: gameSessionPID,
-      },
-    });
-    await prisma.userData.update({
-      where: {
-        userPID: +userPID_2,
-      },
-      data: {
-        gameSessionPID: gameSessionPID,
-      },
-    });
+    // await prisma.userData.update({
+    //   where: {
+    //     userPID: +userPID_1,
+    //   },
+    //   data: {
+    //     gameSessionPID: gameSessionPID,
+    //   },
+    // });
+    // await prisma.userData.update({
+    //   where: {
+    //     userPID: +userPID_2,
+    //   },
+    //   data: {
+    //     gameSessionPID: gameSessionPID,
+    //   },
+    // });
 
     let currentTurn = gameSession ? gameSession.sessionTurn : 0;
     let currentUser_1Score = gameSession ? gameSession.userScore_1 : 0;
