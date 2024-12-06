@@ -192,7 +192,7 @@ const upgradePlayer = async (req, res, next) => {
     }
 
     //강화 확률 설정
-    let maxSuccessRate = Math.min(Math.max(materials.length * 20, 0), 100); //materials가 100을 넘길 수 있으므로 최대 100으로 설정
+    let maxSuccessRate = Math.min(Math.max(materials.length * 20, 0), 100); //materials에 의한 확률을 최소 0, 최대 100으로 설정
     switch (existingPlayer.playerEnchant) {
       case 0:
         maxSuccessRate -= 0;
