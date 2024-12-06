@@ -34,14 +34,34 @@ router.post('/game/match', authMiddleware, async (req, res, next) => {
         },
       },
     });
-    console.log(user_temp[0].playerSquadsData);
 
-    let user_2;
-    user_temp.forEach((user_data) => {
-      if (user_data.playerSquadsData[0].playerEquipRostersData.length >= 3) {
-        return (user_2 = user_data);
-      }
-    });
+    // let userArr = user_temp.filter(user => user.playerSquadsData[0].playerEquipRostersData.length >= 3);
+    // if(userArr.length === 0){
+    //   // 매칭 실패
+    //   return;
+    // }
+    // let random_index = Math.floor(Math.random() * userArr.length);
+    // let matchingUser = userArr[random_index];
+
+    let userArr = [];
+    for (let i = 0; i < user_temp.length; i++) {
+      if (user_temp[i].playerSquadsData[0].playerEquipRostersData.length < 3)
+        continue;
+
+      userArr.push(user_temp[i]);
+      // console.log(i);
+      // let random_index = Math.floor(Math.random() * user_temp.length);
+      // if (
+      //   user_temp[random_index].playerSquadsData[0].playerEquipRostersData
+      //     .length >= 3
+      // ) {
+      //   user_2 = user_temp[random_index];
+      //   return user_2;
+      // }
+    }
+    let random_index = Math.floor(Math.random() * userArr.length);
+    let user_2 = userArr[random_index];
+
     //매칭 실패
     console.log(user_2);
     if (!user_2) {
