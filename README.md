@@ -29,52 +29,7 @@
 # 📕 시작 가이드
 ###
 <h3>Requirements</h3>
-For building and running the application you need:
- 
- - Node.js 18.x
- - Npm 9.2.0
- 
-<h3>Installation</h3>
-
-```
-$ git clone https://github.com/jaeeun0238/SoccerOnline.git
-$ cd SoccerOnline
-```
-#### Run Method
-```
-$ npm install yarn
-$ yarn
-$ node app.js
-```
----
-<br>
-
-## 📖 Stacks
-### Environment
-![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-007ACC?style=for-the-badge&logo=Visual%20Studio%20Code&logoColor=white)
-![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=Git&logoColor=white)
-![Github](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=GitHub&logoColor=white)
-![insomnia](https://img.shields.io/badge/Insomnia-4000BF?style=for-the-badge&logo=Insomnia&logoColor=white)
-
-### Config
-![npm](https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)        
-
-### Development
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=Javascript&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=Node.js&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=Prisma&logoColor=white)
-![AmazonRDS](https://img.shields.io/badge/AmazonRDS-527FFF?style=for-the-badge&logo=AmazonRDS&logoColor=white)
-
-### Communication
-![Slack](https://img.shields.io/badge/Slack-4A154B?style=for-the-badge&logo=Slack&logoColor=white)
-![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=Notion&logoColor=white)
-
-<br>
-
-## 📌 개발 파트
-<details>
-  <summary>유재윤</summary>
+For building and running the application you nee은</summary>
  <br>
   <ul>
     <li>회원관련 생성 및 등록 API</li>
