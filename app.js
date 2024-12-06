@@ -1,6 +1,5 @@
 import express from 'express';
 import errorMiddleware from './middlewares/error.middleware.js';
-
 import userRouter from './routers/user_Router.js';
 import playersRouter from './routers/player_Router.js';
 import gameRouter from './routers/game_Router.js';
