@@ -163,20 +163,23 @@ router.get('/user/rankings', async (req, res, next) => {
       take: 10,
     });
 
+    let rank = 1;
     const userRanking = ranking.map((user, index, array) => {
       if (index > 0 && array[index - 1].userScore === user.userScore) {
         return {
-          ranking: array[index - 1].ranking,
+          ranking: rank,
           userName: user.userName,
           Score: user.userScore,
         };
       }
+      rank = index + 1;
       return {
-        ranking: index + 1,
+        ranking: rank,
         userName: user.userName,
         Score: user.userScore,
       };
     });
+    console.log(userRanking);
     return res.status(200).json({ rank: userRanking });
   } catch (err) {
     return res.status(500).json({ error: '서버 오류입니다.' });
