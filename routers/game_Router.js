@@ -78,24 +78,55 @@ router.post('/game-start', async (req, res, next) => {
         gameSessionPID: gameSessionPID,
       },
       include: {
-        userData: true,
+        userData: {
+          include: {
+            playerSquadsData: {
+              include: {
+                playerEquipRostersData: true,
+              },
+            },
+          },
+        },
       },
     });
 
     const userPID_1 = user_data.userData[0].userPID;
     const userPID_2 = user_data.userData[1].userPID;
-
+    let user_1_player = [];
     /*???????????플레이어정보가져오는법?????????????*/
-    const user1data = await prisma.userData.findUnique({
-      where: { userID: userPID_1 },
-      include: {
-        playerRostersData: {
-          include: {
-            playerEquipRostersData: true,
+    // 유저 데이터[0] 첫번째 유저의 스쿼드데이터에 플레이어 로스터 데이터의 갯수만큼 반복
+    for (
+      let i = 0;
+      i < user_data.userData[0].playerSquadsData.playerEquipRostersData.length;
+      i++
+    ) {
+      // 유저 데이터[0] 첫번째 유저의 스쿼드데이터에 플레이어 로스터 데이터의[i]번째의 playerRostPID의 보유선수 데이터 잘하면 여기 스킵 가능
+      const isPlayer_temp = await prisma.playerRostersData.findUnique({
+        where: {
+          playerRostersPID:
+            user_data.userData[0].playerSquadsData.playerEquipRostersData[i]
+              .playerRostersPID,
+        },
+      });
+      // 그 받아온 선수의 데이터를 선수데이터 db를 불러와서 선수의 실질적인 데이터 받아오기.
+      const player = await prisma.playerData.findUnique({
+        where: { playerPID: isPlayer_temp.playerPID },
+        include: {
+          playerRostersData: {
+            include: {
+              playerEquipRostersData: true,
+            },
           },
         },
-      },
-    });
+      });
+      //여기서 플레이어 선수 푸쉬 해주기
+      user_1_player.push({
+        player: player,
+        playerPosition:
+          user_data.userData[0].playerSquadsData.playerEquipRostersData[i]
+            .position,
+      });
+    }
 
     const user2data = await prisma.userData.findUnique({
       where: { userID: userPID_2 },
