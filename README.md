@@ -77,13 +77,15 @@ $ node app.js
   <summary>유재윤</summary>
  <br>
   <ul>
-    <li>회원관련 router 생성 및 등록</li>
+    <li>회원관련 생성 및 등록 API</li>
+    <br>
     <li>회원가입
       <ul>
         <li>API 작성</li>
         <li>회원 DB 설계</li>
       </ul>
     </li>
+    <br>
     <li>로그인
       <ul>
         <li>API 작성</li>
@@ -97,13 +99,16 @@ $ node app.js
   <summary>조상우</summary>
    <br>
   <ul>
-    <li>팀, 매칭 API, DB</li>
+    <li>팀, 매칭 API, DB 설계</li>
+    <br>
     <li>팀 기능</li>
     <ul>
     <li>팀 테이블 관련 넣고 빼기</li>
     <li>팀 테이블 보유 선수 테이블 보여주기</li>
     </ul>
+    <br>
     <li>모든 db 설계</li>
+    <br>
     <li>매칭 기능</li>
    <ul>
     <li>유저 실력에 맞게 매칭</li>
@@ -114,7 +119,8 @@ $ node app.js
   <summary>김지웅</summary>
    <br>
   <ul>
-   <li>캐시 구매 API</li>
+   <li>캐시 API</li>
+   <br>
     <li>캐시 구매 기능
       <ul>
         <li>body로 받은 cash 값만큼 해당 유저의 cash를 증가시킨다</li>
@@ -128,12 +134,14 @@ $ node app.js
    <br>
   <ul>
     <li>선수 뽑기 및 강화 API</li>
+    <br>
     <li>선수 뽑기 기능
       <ul>
         <li>캐시를 사용하면 데이터베이스 내의 여러 선수중 임의 한 명 추출</li>
         <li>뽑은 선수는 보유 선수 테이블에 저장</li>
       </ul>
     </li>
+    <br>
     <li>선수 강화 기능
       <ul>
         <li>선수뽑기로 로스터에 등록된 선수를 이용</li>
@@ -149,12 +157,14 @@ $ node app.js
      <br>
   <ul>
     <li>선수 등록 및 랭킹 API</li>
+    <br>
     <li>선수 뽑기 기능
       <ul>
         <li>Request의 body를 통해 전달받은 Json데이터로 생성에 필요한 데이터로 추출</li>
         <li>추출한 데이터로 선수 등록 기능 구현</li>
       </ul>
     </li>
+    <br>
     <li>유저 랭킹 확인 기능
       <ul>
         <li>userData테이블에서 userName과 userScore를 선택하여 스코어 기준 내림차순으로 10명을 추출</li>
@@ -171,12 +181,14 @@ $ node app.js
      <br>
   <ul>
     <li>게임 플레이 및 전적 API</li>
+    <br>
     <li>게임 플레이 기능
       <ul>
         <li>스쿼드 포지션별 점수 정규화 후 합산</li>
         <li>상대 스쿼드와 내스쿼드 점수 합산 후 합산한 수중 랜덤난수 나온수가 내스쿼드 점수보다 낮으면 승리</li>
       </ul>
     </li>
+    <br>
     <li>게임 전적
       <ul>
         <li>게임 결과 전적기록으로 남기기</li>
@@ -244,7 +256,6 @@ https://teamsparta.notion.site/13f2dc3ef51481428498f6823ea158a2?v=13f2dc3ef51481
   <summary>선수 강화</summary>
    <br>
   <ul>
-   <li>선수 강화 API</li>
     <li>선수 강화 기본 설정
       <ul>
         <li>Player 관련 API로 player_Router.js에 작성</li>
@@ -255,6 +266,7 @@ https://teamsparta.notion.site/13f2dc3ef51481428498f6823ea158a2?v=13f2dc3ef51481
         <li>강화 단계에 따라 확률 감소, 플레이어 스탯 증가</li>
         <li>PUT 요청으로 보낼 예정</li>
       </ul>
+      <br>
     </li>
        <li>작업 추가 설명
       <ul>
