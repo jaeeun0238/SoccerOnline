@@ -245,7 +245,7 @@ https://teamsparta.notion.site/13f2dc3ef51481428498f6823ea158a2?v=13f2dc3ef51481
    
 | API 요청 화면 |
 | :--------------------------------------------: |
-|  |
+|![image](https://github.com/user-attachments/assets/2bd2e131-c5c6-468f-b6bd-51e5d7dce834)|
 
 ---
 <br>
