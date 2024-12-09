@@ -1,11 +1,14 @@
-import express from 'express';
+import express, { request } from 'express';
 import { prisma } from '../uts/prisma/index.js';
 import errModel from '../middlewares/error.middleware.js';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import authMiddleware from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 // 회원가입api
 /** 사용자 회원가입 API **/
-router.post('/sign-up', async (req, res) => {
+router.post('/sign-up', async (req, res, next) => {
   const { userID, userName, userPassword } = req.body;
 
   try {
@@ -23,23 +26,59 @@ router.post('/sign-up', async (req, res) => {
 
     // 비밀번호 해시화 (변경된 부분)
     const bcryptPassword = await bcrypt.hash(userPassword, 10); // salt rounds 추가
-
-    // userData 테이블에 사용자를 추가
-    const user = await prisma.userData.create({
-      data: {
-        userID,
-        userName,
-        userPassword: bcryptPassword,
-        userScore: 0,
-        userCash: 5000,
-      },
+    const players = await prisma.playerData.findMany({
+      take: 3,
     });
 
+    const result = await prisma.$transaction(async (tx) => {
+      // 트랜잭션 내에서 사용자를 생성합니다.
+      const user = await tx.userData.create({
+        data: {
+          userID,
+          userName,
+          userPassword: bcryptPassword,
+          userScore: 1000,
+          userCash: 5000,
+        },
+      });
+      //스쿼드 만들기
+      const squard = await tx.playerSquadsData.create({
+        data: {
+          userPID: user.userPID,
+        },
+      });
+
+      for (let i = 0; i < players.length; i++) {
+        const player = players[i];
+        const defaultPlayer = await tx.playerRostersData.create({
+          data: {
+            userPID: user.userPID,
+            playerPID: player.playerPID,
+            playerEnchant: 0,
+          },
+        });
+        //playerPID를 이용해서 장착되게
+        const equipRoster = await tx.playerEquipRostersData.create({
+          data: {
+            playerSquadsPID: squard.playerSquadsPID,
+            playerRostersPID: defaultPlayer.playerRostersPID,
+            position: i,
+          },
+        });
+        console.log(equipRoster);
+      }
+
+      // 에러가 발생하여, 트랜잭션 내에서 실행된 모든 쿼리가 롤백됩니다.
+      return user;
+    });
+    // userData 테이블에 사용자를 추가
+
     return res.status(201).json({ message: '회원가입이 완료되었습니다.' });
-  } catch (error) {
+  } catch (err) {
+    next(err);
     // 오류 처리 시작 (변경된 부분)
-    console.error(error); // 오류 로그 출력 (변경된 부분)
-    return res.status(500).json({ message: '서버 오류가 발생했습니다.' }); // 오류 응답 반환 (변경된 부분)
+    // console.error(error); // 오류 로그 출력 (변경된 부분)
+    // return res.status(500).json({ message: '서버 오류가 발생했습니다.' }); // 오류 응답 반환 (변경된 부분)
   }
 });
 
@@ -57,55 +96,46 @@ router.post('/sign-in', async (req, res, next) => {
     return res.status(401).json({ message: '비밀번호가 일치하지 않습니다.' });
 
   // 로그인에 성공하면, 사용자의 userId를 바탕으로 토큰을 생성합니다.
+  console.log(process.env.JWT_KEY);
+
   const token = jwt.sign(
     {
       userPID: user.userPID,
     },
-    process.env.JWT_SECRET, // 비밀 키를 환경 변수에서 가져옴
+    process.env.JWT_KEY, // 비밀 키를 환경 변수에서 가져옴
     { expiresIn: '1h' }, // 토큰의 만료 시간을 설정 (1시간)
   );
 
-  // authotization 쿠키에 Berer 토큰 형식으로 JWT를 저장합니다.
-  res.cookie('authorization', `Bearer ${token}`);
-  return res.status(200).json({ message: '로그인 성공' });
+  // 헤더로 주고받게 바꾸기
+  res.setHeader('authorization', `Bearer ${token}`);
+  return res.status(200).json({
+    message: '로그인 성공',
+    user: {
+      userID: user.userID,
+    },
+  });
 });
 
 // 캐시 구매
-router.patch('/buyCash/:userPID', async (req, res, next) => {
+router.patch('/buyCash', authMiddleware, async (req, res, next) => {
   try {
-    const { userPID } = req.params;
-    const { cash } = req.body; // 예시로 body에 '"cash": 5000'으로 되어있는걸 가져옴
-    // const authorization = req.headers['authorization']; // header에 'authorization' 값 가져옴
-    // const [tokenType, token] = authorization.split(' '); // bearer과 token값 객체구조분해 할당
-
-    // 토큰형식 확인, middleware로 따로 빼도 됨
-    // if (tokenType !== 'Bearer') {
-    //   return next(errModel(401, '토큰 형식이 잘못되었습니다.'));
-    // }
-
-    // const decodedToken = jwt.verify(token, process.env.JWT_KEY); // 토큰 원상태로, 키 부분 이름은 추후 수정
-    // const userPID = decodedToken.userPID; //토큰의 userPID부분 가져옴
-    console.log(userPID);
+    const { userPID } = req.user;
+    const { cash } = req.body;
 
     // 현재 보유량 + 추가 캐시 하기위해 현재 user정보 가져옴
     const user = await prisma.userData.findUnique({
       where: { userPID: +userPID },
     });
 
-    // userPID가 존재하지 않으면 에러 반환, middleware로 따로 빼도 됨
-    // if (!user) {
-    //   return next(errModel(404, '일치하는 사용자가 존재하지 않습니다.'));
-    // }
-
     // cash가 존재하지 않으면 에러, middleware로 따로 빼도 됨
-    // if (!cash) {
-    //   return next(errModel(400, '캐시를 입력해 주세요.'));
-    // }
+    if (!cash) {
+      return res.status(400).json({ error: '캐시를 입력해 주세요.' });
+    }
 
     // cash가 유효한 값인지 검사, middleware로 따로 빼도 됨
-    // if (typeof cash !== 'number' || cash < 0) {
-    //   return next(errModel(400, '유효한 캐시 값을 입력해 주세요.'));
-    // }
+    if (typeof cash !== 'number' || cash < 0) {
+      return res.status(400).json({ error: '유효한 캐시 값을 입력해 주세요.' });
+    }
 
     // 캐시 추가해서 업데이트
     const updateCash = await prisma.userData.update({
@@ -116,6 +146,43 @@ router.patch('/buyCash/:userPID', async (req, res, next) => {
     return res.status(200).json({ currentCash: updateCash.userCash });
   } catch (err) {
     next(err);
+  }
+});
+
+//유저 랭킹 조회
+router.get('/user/rankings', async (req, res, next) => {
+  try {
+    const ranking = await prisma.userData.findMany({
+      select: {
+        userName: true,
+        userScore: true,
+      },
+      orderBy: {
+        userScore: 'desc',
+      },
+      take: 10,
+    });
+
+    let rank = 1;
+    const userRanking = ranking.map((user, index, array) => {
+      if (index > 0 && array[index - 1].userScore === user.userScore) {
+        return {
+          ranking: rank,
+          userName: user.userName,
+          Score: user.userScore,
+        };
+      }
+      rank = index + 1;
+      return {
+        ranking: rank,
+        userName: user.userName,
+        Score: user.userScore,
+      };
+    });
+    console.log(userRanking);
+    return res.status(200).json({ rank: userRanking });
+  } catch (err) {
+    return res.status(500).json({ error: '서버 오류입니다.' });
   }
 });
 
